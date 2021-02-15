@@ -1,3 +1,3 @@
-$$ Edubot
+# Edubot
 
 Educational bots.
