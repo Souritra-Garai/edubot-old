@@ -10,8 +10,8 @@ int main(int argc, char **argv)
 
     printf("Motor Control Node initialized\n");
 
-    Motor_Controller motor_L(node_handle, "/TPL", "/TDL");
-    Motor_Controller motor_R(node_handle, "/TPR", "/TDR");
+    Motor_Controller motor_L(node_handle, "U1/L");
+    Motor_Controller motor_R(node_handle, "U1/R");
 
     printf("Motor object initialized\n");
 
