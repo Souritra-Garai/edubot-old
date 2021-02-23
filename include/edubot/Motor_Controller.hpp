@@ -1,16 +1,18 @@
 #ifndef __MOTOR_CONTROLLER__
 #define __MOTOR_CONTROLLER__
 
+#include "math.h"
+
 #include "ros/ros.h"
 #include "std_msgs/UInt8.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float32.h"
 
-#include <math.h>
+#include "PID_Calculator.hpp"
 
 #define QUEUE_SIZE 10
 
-class Motor_Controller
+class Motor_Controller: public PID_Calculator
 {
     private:
 

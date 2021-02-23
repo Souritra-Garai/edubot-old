@@ -13,9 +13,12 @@ int main(int argc, char **argv)
     Motor_Controller motor_L(node_handle, "U1/L");
     Motor_Controller motor_R(node_handle, "U1/R");
 
+    motor_L.set_PID_gains(1.0, 1.0, 1.0);
+    motor_R.set_PID_gains(1.0, 1.0, 1.0);
+
     printf("Motor object initialized\n");
 
-    ros::Rate loop_rate(1);
+    ros::Rate loop_rate(1); // 1 Hz
 
     while (ros::ok())
     {

@@ -16,7 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
-
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -104,7 +103,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES Motor_Controller
+  LIBRARIES Motor_Controller PID_Calculator
   CATKIN_DEPENDS roscpp rospy std_msgs
   # DEPENDS system_lib
 )
@@ -150,6 +149,16 @@ include_directories(
 # )
 
 # Declare a C++ library
+add_library(PID_Calculator
+  src/PID_Calculator.cpp
+)
+
+# Specify libraries to link a library or executable target against
+target_link_libraries(PID_Calculator
+  ${catkin_LIBRARIES}
+)
+
+# Declare a C++ library
 add_library(Motor_Controller
   src/Motor_Controller.cpp
 )
@@ -157,6 +166,7 @@ add_library(Motor_Controller
 # Specify libraries to link a library or executable target against
 target_link_libraries(Motor_Controller
   ${catkin_LIBRARIES}
+  PID_Calculator
 )
 
 # Declare a C++ executable
@@ -191,14 +201,14 @@ install(TARGETS motor_control_node
 
 # Mark libraries for installation
 # See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-install(TARGETS Motor_Controller
+install(TARGETS Motor_Controller PID_Calculator
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
 )
 
 # Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY include/${PROJECT_NAME}/ include/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
