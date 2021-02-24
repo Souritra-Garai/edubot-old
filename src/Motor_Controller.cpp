@@ -72,9 +72,9 @@ void Motor_Controller::ros_check_updates_and_publish()
 
 void Motor_Controller::update_motor_control_variables()
 {
-    float val = 255.0 * tanh(calc_effort(target_angular_velocity - current_angular_velocity));
+    float val = round(calc_effort(target_angular_velocity - current_angular_velocity));
     
-    target_PWM = (uint8_t) abs(val);
+    target_PWM = (uint8_t) std::min(abs(val), 255.0f);
     target_direction = signbit(val);
 }
 

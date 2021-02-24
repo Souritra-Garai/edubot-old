@@ -169,6 +169,16 @@ target_link_libraries(Motor_Controller
   PID_Calculator
 )
 
+# Declare a C++ library
+add_library(Encoder_Reader
+  src/Encoder_Reader.cpp
+)
+
+# Specify libraries to link a library or executable target against
+target_link_libraries(Encoder_Reader
+  ${catkin_LIBRARIES}
+)
+
 # Declare a C++ executable
 # With catkin_make all packages are built within a single CMake context
 # The recommended prefix ensures that target names across packages don't collide
@@ -178,6 +188,17 @@ add_executable(motor_control_node src/motor_control_node.cpp)
 target_link_libraries(motor_control_node
   ${catkin_LIBRARIES}
   Motor_Controller
+)
+
+# Declare a C++ executable
+# With catkin_make all packages are built within a single CMake context
+# The recommended prefix ensures that target names across packages don't collide
+add_executable(encoder_reading_node src/encoder_reading_node.cpp)
+
+# Specify libraries to link a library or executable target against
+target_link_libraries(encoder_reading_node
+  ${catkin_LIBRARIES}
+  Encoder_Reader
 )
 
 #############
@@ -195,13 +216,13 @@ catkin_install_python(PROGRAMS scripts/listener.py
 
 # Mark executables for installation
 # See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-install(TARGETS motor_control_node
+install(TARGETS motor_control_node encoder_reading_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 # Mark libraries for installation
 # See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-install(TARGETS Motor_Controller PID_Calculator
+install(TARGETS Motor_Controller PID_Calculator Encoder_Reader
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
