@@ -75,7 +75,7 @@ void Motor_Controller::update_motor_control_variables()
     float val = round(calc_effort(target_angular_velocity - current_angular_velocity));
     
     target_PWM = (uint8_t) std::min(abs(val), 255.0f);
-    target_direction = signbit(val);
+    target_direction = std::signbit(val);
 }
 
 void Motor_Controller::spinOnce()
