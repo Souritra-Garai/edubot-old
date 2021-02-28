@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv)
 {
-    // ros::init(argc, argv, "Encoder_Reading_Node");
+    ros::init(argc, argv, "Encoder_Reading_Node");
 
     ros::NodeHandle node_handle; 
 
