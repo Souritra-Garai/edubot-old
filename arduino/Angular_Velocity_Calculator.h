@@ -26,12 +26,10 @@ class angularVelocityCalculator : protected Encoder
     private:
         
         float32_t angularVelocity;
-
-        float32_t updateFrequency;
-
-        float32_t countsPerRotation;
-
         float32_t encoderReadingsArray[5];
+
+        const float32_t updateFrequency;
+        const float32_t countsPerRotation;
         
         void pushReading(float32_t newReading);
         void calcAngularVelocity();

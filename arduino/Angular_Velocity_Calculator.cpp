@@ -1,6 +1,11 @@
 #include "Angular_Velocity_Calculator.h"
 
-angularVelocityCalculator::angularVelocityCalculator(uint8_t pin1, uint8_t pin2) : Encoder(pin1, pin2)
+angularVelocityCalculator::angularVelocityCalculator(
+    uint8_t pin1,
+    uint8_t pin2,
+    float32_t freq,
+    flaot32_t cpr
+) : Encoder(pin1, pin2), updateFrequency(freq), countsPerRotation(cpr)
 {
     angularVelocity = 0.0f;
 
