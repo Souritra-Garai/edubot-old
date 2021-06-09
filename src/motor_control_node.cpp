@@ -2,6 +2,10 @@
 
 #include "edubot/Motor_Controller.hpp"
 
+#define Kp 5 
+#define Ki 120
+#define Kd 0
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "Motor_Controller_Node");
@@ -13,8 +17,8 @@ int main(int argc, char **argv)
     Motor_Controller motor_L(node_handle, "U1/L");
     Motor_Controller motor_R(node_handle, "U1/R");
 
-    motor_L.set_PID_gains(1.0, 1.0, 1.0);
-    motor_R.set_PID_gains(1.0, 1.0, 1.0);
+    motor_L.set_PID_gains(Kp, Ki, Kd);
+    motor_R.set_PID_gains(Kp, Ki, Kd);
 
     // printf("Motor object initialized\n");
 
