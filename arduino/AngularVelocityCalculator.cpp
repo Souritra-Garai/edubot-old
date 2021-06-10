@@ -1,22 +1,22 @@
-#include "Angular_Velocity_Calculator.h"
+#include "AngularVelocityCalculator.h"
 
 angularVelocityCalculator::angularVelocityCalculator(
     uint8_t pin1,
     uint8_t pin2,
-    float32_t freq,
-    flaot32_t cpr
+    float freq,
+    float cpr
 ) : Encoder(pin1, pin2), updateFrequency(freq), countsPerRotation(cpr)
 {
     angularVelocity = 0.0f;
 
-    memset(encoderReadingsArray, 0, 20);
+    memset(encoderReadingsArray, 0, 5*sizeof(float);
 }
 
-inline void angularVelocityCalculator::pushReading(float32_t val)
+inline void angularVelocityCalculator::pushReading(float val)
 {
-    memmove(&encoderReadingsArray[1], &encoderReadingsArray[0], 16);
+    memmove(&encoderReadingsArray[1], &encoderReadingsArray[0], 4*sizeof(float);
     
-    encoderReadingsArray[0] = (float32_t) val;
+    encoderReadingsArray[0] = (float) val;
 }
 
 inline void angularVelocityCalculator::calcAngularVelocity()
@@ -36,7 +36,7 @@ inline void angularVelocityCalculator::updateAngularVelocity()
     calcAngularVelocity();
 }
 
-float32_t angularVelocityCalculator::getAngularVelocity()
+inline float angularVelocityCalculator::getAngularVelocity()
 {
     return angularVelocity;
 }

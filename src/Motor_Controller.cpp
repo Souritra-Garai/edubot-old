@@ -92,6 +92,7 @@ void Motor_Controller::current_angular_velocity_callback(const std_msgs::Float32
 
 void Motor_Controller::target_angular_velocity_callback(const std_msgs::Float32 &msg)
 {
+    reset();
     target_angular_velocity = msg.data;
     // printf("Updated target angular velocity to %f\n", target_angular_velocity);
 }

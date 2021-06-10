@@ -18,20 +18,19 @@
 #define __VELOCITY_CALC__
 
 #include "Arduino.h"
-
 #include "Encoder.h"
 
 class angularVelocityCalculator : protected Encoder
 {
     private:
         
-        float32_t angularVelocity;
-        float32_t encoderReadingsArray[5];
+        float angularVelocity;
+        float encoderReadingsArray[5];
 
-        const float32_t updateFrequency;
-        const float32_t countsPerRotation;
+        const float updateFrequency;
+        const float countsPerRotation;
         
-        void pushReading(float32_t newReading);
+        void pushReading(float newReading);
         void calcAngularVelocity();
 
     public:
@@ -39,13 +38,13 @@ class angularVelocityCalculator : protected Encoder
         angularVelocityCalculator(
             uint8_t encoderPin1,
             uint8_t encoderPin2,
-            float32_t updateFrequency,
-            float32_t countsPerRotation
+            float updateFrequency,
+            float countsPerRotation
         );
 
         void updateAngularVelocity();
 
-        float32_t getAngularVelocity();
+        float getAngularVelocity();
 };
 
 #endif
