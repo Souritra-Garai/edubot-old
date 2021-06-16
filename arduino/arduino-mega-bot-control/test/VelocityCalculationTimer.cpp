@@ -3,7 +3,7 @@
 
 #define SERIAL_PRINT_TIME_PERIOD 1000
 
-angularVelocityCalculator encoderShaft(2, 3, 8000, 30);
+AngularVelocityCalculator encoderShaft(2, 3, 8000, 30);
 
 long int lastTime;
 

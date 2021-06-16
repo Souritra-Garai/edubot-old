@@ -1,60 +1,61 @@
 #include "AngularVelocityCalculator.h"
 // #include "AngularVelocityCalculator.cpp"
 
-#define SERIAL_PRINT_TIME_PERIOD 1000
+#define SERIAL_PRINT_TIME_PERIOD 2000
+#define VEL_CALC_FREQ 8000
 
-angularVelocityCalculator encoderShaft(2, 3, 8000, 30);
+AngularVelocityCalculator encoderShaft(2, 3, VEL_CALC_FREQ, 30);
 
-long int lastTime;
+long int lastSerialPrintTime;
+long double lastVelCalcTime;
 
-void initializeTimer2();
+double i;
+double time_period_sum;
+double time_period_sqr_sum;
+
+double start_time;
+double vel_update_duration;
 
 void setup()
 {
   Serial.begin(9600);
-  lastTime = millis();
+  lastSerialPrintTime = millis();
+  lastVelCalcTime = micros();
 
-  initializeTimer2();
+  i = 0;
+  time_period_sum = 0;
+  time_period_sqr_sum = 0;
   
   Serial.println("Arduino Initialized successfully");
 }
 
 void loop()
 {
-  if (millis() - lastTime > SERIAL_PRINT_TIME_PERIOD)
+  
+  if (millis() - lastSerialPrintTime > SERIAL_PRINT_TIME_PERIOD)
   {
-    Serial.println(encoderShaft.getAngularVelocity());
+    double average_time_period = time_period_sum / i;
+    
+    Serial.println("Average Time Period (us) : ");
+    Serial.println(average_time_period);
+
+    Serial.println("Standard Deviation (us) : ");
+    Serial.println(sqrt(time_period_sqr_sum/i - average_time_period*average_time_period));
+
     // Serial.println(encoderShaft.read());
-    lastTime = millis();
+    lastSerialPrintTime = millis();
   }
-}
 
-void initializeTimer2()
-{
-  // stop interrupts
-  cli();
+  if (micros() - lastVelCalcTime > 1/VEL_CALC_FREQ)
+  {
+    start_time = micros();
+    encoderShaft.updateAngularVelocity();
+    vel_update_duration = micros() - start_time;
 
-  // set timer2 interrupt at 8kHz
-  
-  TCCR2A = 0; // set entire TCCR2A register to 0
-  TCCR2B = 0; // same for TCCR2B
-  TCNT2 = 0; // initialize counter value to 0
-  
-  // set compare match register for 8khz increments
-  OCR2A = 249; // = (16*10^6) / (8000*8) - 1 (must be <256)
-  
-  // turn on CTC mode
-  TCCR2A |= (1 << WGM21);
-  // Set CS21 bit for 8 prescaler
-  TCCR2B |= (1 << CS22); 
-  // enable timer compare interrupt
-  TIMSK2 |= (1 << OCIE2A);
+    time_period_sum += vel_update_duration;
+    time_period_sqr_sum += vel_update_duration * vel_update_duration;
+    i += 1;
 
-  //allow interrupts
-  sei();
-}
-
-ISR(TIMER2_COMPA_vect)
-{
-  encoderShaft.updateAngularVelocity();
+    lastVelCalcTime = micros();
+  }
 }
