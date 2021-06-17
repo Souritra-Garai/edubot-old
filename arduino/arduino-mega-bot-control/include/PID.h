@@ -7,19 +7,34 @@ class PID
 {
     private:
     
-        float proportionalGain;
-        float integralGain;
-        float differentialGain;
+        float proportional_gain_;
+        float integral_gain_;
+        float differential_gain_;
         
-        float lastError;
-        float IntegralError;
-        float lastStateValue;
+        float last_error_;
+        float integral_error_;
+        
+        float target_state_value_;
+        float last_state_value_;
 
-        float lastCallTime;
+        float time_period_;
 
     public:
-        PID(/* args */);
-        ~PID();
+
+        PID();
+        PID(
+            float proportional_gain,
+            float integral_gain,
+            float differential_gain
+        );
+
+        void setPIDGains(
+            float proportional_gain,
+            float integral_gain,
+            float differential_gain
+        );
+
+        
 };
 
 PID::PID(/* args */)

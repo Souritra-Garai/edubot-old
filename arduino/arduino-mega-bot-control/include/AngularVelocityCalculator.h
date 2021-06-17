@@ -29,23 +29,22 @@
 
 // Definition of class angularVelocityCalculator
 // It is derived from Encoder class
-class AngularVelocityCalculator : protected Encoder
+class AngularVelocityCalculator : public Encoder
 {
     private:
         
         // This array of 5 elements stores last 5 positions
         // of the shaft read from the encoder at a certain
         // interval
-        volatile float encoderReadingsArray[5];
+        volatile float encoder_readings_array_[5];
 
-        // The coefficients to the 5 position values
-        // in the expression of the 5th order velocity estimation
-        // scheme
-        const float coefficient0;
-        const float coefficient1;
-        const float coefficient2;
-        const float coefficient3;
-        const float coefficient4;
+        // Time interval after which a new encoder position
+        // value is inserted to
+        const float time_period_;
+
+        // Number of counts of change in encoder position to
+        // complete one full rotation of the wheel
+        const float counts_per_rotation_;
 
     public:
         
@@ -55,10 +54,10 @@ class AngularVelocityCalculator : protected Encoder
         // updateFrequency - Frequency at which new position value is read from the encoder
         // countsPerRotation - No. of quadrature turn counts of encoder to complete one shaft rotation
         AngularVelocityCalculator(
-            uint8_t encoderPin1,
-            uint8_t encoderPin2,
-            float updateFrequency,
-            float countsPerRotation
+            uint8_t encoder_pin_1,
+            uint8_t encoder_pin_2,
+            float update_frequency,
+            float counts_per_rotation
         );
 
         // This function is called at the specified frequency
@@ -68,54 +67,59 @@ class AngularVelocityCalculator : protected Encoder
         // the function is definitely inlined by compiler
 
         // Returns latest angular velocity in radians per second
-        inline float getAngularVelocity();
+        inline float getAngularVelocity() __attribute__((always_inline));
 };
 
+/*====================================================================================*/
+
+// The function definition of the member functions of this class is done in the header file itself
+// since compiler could not inline functions that are defined and declared in separate files
+// Inlining the function is absolutely necessary as funciton call overheads cost up to 100 us (ATmega2560)
+// whereas executing the tasks inside the functions take up to 10 us
+
 AngularVelocityCalculator::AngularVelocityCalculator(
-    uint8_t encoderPin1,
-    uint8_t encoderPin2,
-    float updateFrequency,
-    float countsPerRotation
-) : Encoder(encoderPin1, encoderPin2),
-    coefficient0(25.0f * updateFrequency * 2.0f * PI / (12.0f * countsPerRotation)),
-    coefficient1(- 48.0f * updateFrequency * 2.0f * PI / (12.0f * countsPerRotation)),
-    coefficient2(36.0f * updateFrequency * 2.0f * PI / (12.0f * countsPerRotation)),
-    coefficient3(- 16.0f * updateFrequency * 2.0f * PI / (12.0f * countsPerRotation)),
-    coefficient4(3.0f * updateFrequency * 2.0f * PI / (12.0f * countsPerRotation))
+    uint8_t encoder_pin_1,
+    uint8_t encoder_pin_2,
+    float update_frequency,
+    float counts_per_rotation
+) : Encoder(encoder_pin_1, encoder_pin_2),
+    time_period_(1 / update_frequency),
+    counts_per_rotation_(counts_per_rotation)
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        encoderReadingsArray[0] = 0;
-        encoderReadingsArray[1] = 0;
-        encoderReadingsArray[2] = 0;
-        encoderReadingsArray[3] = 0;
-        encoderReadingsArray[4] = 0;
+        encoder_readings_array_[0] = 0.0f;
+        encoder_readings_array_[1] = 0.0f;
+        encoder_readings_array_[2] = 0.0f;
+        encoder_readings_array_[3] = 0.0f;
+        encoder_readings_array_[4] = 0.0f;
     }
 }
 
 void AngularVelocityCalculator::updateAngularVelocity()
 {
     // memmove(&encoderReadingsArray[1], &encoderReadingsArray[0], 4*sizeof(float));
-    encoderReadingsArray[4] = encoderReadingsArray[3];
-    encoderReadingsArray[3] = encoderReadingsArray[2];
-    encoderReadingsArray[2] = encoderReadingsArray[1];
-    encoderReadingsArray[1] = encoderReadingsArray[0];
-    encoderReadingsArray[0] = read();
+    encoder_readings_array_[4] = encoder_readings_array_[3];
+    encoder_readings_array_[3] = encoder_readings_array_[2];
+    encoder_readings_array_[2] = encoder_readings_array_[1];
+    encoder_readings_array_[1] = encoder_readings_array_[0];
+    encoder_readings_array_[0] = (float) read();
 }
 
 float AngularVelocityCalculator::getAngularVelocity()
 {
-    float angularVelocity;
+    float angular_velocity;
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        angularVelocity =
-            coefficient0 * encoderReadingsArray[0] +
-            coefficient1 * encoderReadingsArray[1] +
-            coefficient2 * encoderReadingsArray[2] +
-            coefficient3 * encoderReadingsArray[3] +
-            coefficient4 * encoderReadingsArray[4];
+        angular_velocity = 2.0f * PI * (
+            25.0f * encoder_readings_array_[0] -
+            48.0f * encoder_readings_array_[1] +
+            36.0f * encoder_readings_array_[2] -
+            16.0f * encoder_readings_array_[3] +
+            3.0f  * encoder_readings_array_[4]
+        ) / (12.0f * time_period_ * counts_per_rotation_);
     }
-    return angularVelocity;
+    return angular_velocity;
 }
 
 #endif

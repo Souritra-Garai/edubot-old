@@ -51,20 +51,20 @@ void loop()
   if (millis() - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
   {
     double mean_velocity_update_time = velocity_update_time_period_sum / velocity_update_num_observations;
-    double std_dev_velocity_update_time = sqrt(velocity_update_time_period_sqr_sum / velocity_update_num_observations - mean_velocity_update_time * mean_velocity_update_time);
+    double std_dev_velocity_update_time = velocity_update_time_period_sqr_sum / velocity_update_num_observations - mean_velocity_update_time * mean_velocity_update_time;
 
     double mean_velocity_get_time = velocity_get_time_period_sum / velocity_get_num_observations;
-    double std_dev_velocity_get_time = sqrt(velocity_get_time_period_sqr_sum / velocity_get_num_observations - mean_velocity_get_time * mean_velocity_get_time);
+    double std_dev_velocity_get_time = velocity_get_time_period_sqr_sum / velocity_get_num_observations - mean_velocity_get_time * mean_velocity_get_time;
 
     Serial.print("Time taken for Velocity Update : Mean ");
     Serial.print(mean_velocity_update_time);
     Serial.print("\t Std Dev ");
-    Serial.println(std_dev_velocity_update_time);
+    Serial.print(std_dev_velocity_update_time);
 
     Serial.print("Time taken for Velocity Get : Mean ");
     Serial.print(mean_velocity_get_time);
     Serial.print("\t Std Dev ");
-    Serial.println(std_dev_velocity_get_time);    
+    Serial.print(std_dev_velocity_get_time);    
     
     last_serial_print_time = millis();
   }
@@ -72,7 +72,6 @@ void loop()
   if (micros() - last_velocity_update_time > VELOCITY_UPDATE_TIME_PERIOD)
   {
     start_time = micros();
-    float val = encoder_shaft.getAngularVelocity();
     encoder_shaft.updateAngularVelocity();
     duration = micros() - start_time;
 
@@ -86,7 +85,7 @@ void loop()
   if (micros() - last_velocity_get_time > VELOCITY_GET_TIME_PERIOD)
   {
     start_time = micros();
-    float val = encoder_shaft.getAngularVelocity();
+    encoder_shaft.updateAngularVelocity();
     duration = micros() - start_time;
 
     velocity_get_time_period_sum += duration;
