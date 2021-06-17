@@ -14,7 +14,7 @@
 // printed to serial monitor
 #define SERIAL_PRINT_TIME_PERIOD 1000
 
-AngularVelocityCalculator encoder_shaft(2, 4, 8000, 60);
+AngularVelocityCalculator encoder_shaft(2, 4, 8000, 560);
 
 long int last_time;
 
