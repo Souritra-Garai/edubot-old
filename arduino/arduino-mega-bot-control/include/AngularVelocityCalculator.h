@@ -140,17 +140,32 @@ float AngularVelocityCalculator::getAngularVelocity()
     {
         // Atomic block prevents any interrupts from
         // stopping the initializing task
-        angular_velocity = 2.0f * PI * (
+        
+        // Estimate angular velocity using 5th order scheme
+        angular_velocity = 60 * (
             25.0f * encoder_readings_array_[0] -
             48.0f * encoder_readings_array_[1] +
             36.0f * encoder_readings_array_[2] -
             16.0f * encoder_readings_array_[3] +
             3.0f  * encoder_readings_array_[4]
         ) / (12.0f * time_period_ * counts_per_rotation_);
+        
+        // // For debug, simple 1st Order backward scheme
+        // // to estimate velocity
+        // angular_velocity = 60.0f * (float) (
+        //     encoder_readings_array_[0] -
+        //     encoder_readings_array_[1]
+        // ) / (time_period_ * counts_per_rotation_);
+
         // Atomic restorestate will restore the status
         // of interrupts to whatever it was before it stopped
         // all interrupts, i.e. enabled / disabled.
     }
+    
+    // Serial.print("Time Period:\t");
+    // Serial.println(time_period_, 10);
+    // Serial.print("Counts per Rotation:\t");
+    // Serial.println(counts_per_rotation_);
     return angular_velocity;
 }
 
