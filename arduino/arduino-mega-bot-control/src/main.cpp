@@ -10,26 +10,62 @@
 
 #include "AngularVelocityCalculator.h"
 
-// Time interval after which angular velocity is
+// Time interval after which anything is
 // printed to serial monitor
 #define SERIAL_PRINT_TIME_PERIOD 1000
 
-AngularVelocityCalculator encoder_shaft(2, 4, 8E3, 840);
+#define ENCODER_PIN_A 2
+#define ENCODER_PIN_B 4
 
-long int last_time;
+#define VELOCITY_UPDATE_FREQUENCY 8E3 // Hz
 
-float duration_sum = 0;
-float last_update_time = 0;
-float current_time = 0;
-float num = 0;
+#define ENCODER_COUNTS_PER_ROTATION 840
 
+// Our object to estimate the angular velocity of encoder shaft
+AngularVelocityCalculator encoder_shaft(
+  ENCODER_PIN_A,
+  ENCODER_PIN_B,
+  VELOCITY_UPDATE_FREQUENCY,
+  ENCODER_COUNTS_PER_ROTATION
+);
+
+// To store the last time anything was
+// printed through serial port in millisecond
+long int last_serial_print_time;
+
+// To verify the time period of velocity update
+// Variable to store the sum of durations in microseconds
+// after which velocity is updated
+float velocity_update_duration_sum;
+// Variable to store when the last velocity update 
+// was performed in microsecond
+float last_velocity_update_time;
+// Variable to fetch and store the time during
+// velocity update
+float current_velocity_update_time;
+// Variable to store the number of velocity updates 
+// that are performed
+float number_velocity_updates;
+
+// Declaration of function for initializing Timer 2
+// interrupts
 void initialize_timer_2();
 
 void setup()
 {
+  // Initialize Serial Comm
   Serial.begin(9600);
-  last_time = millis();
 
+  // Initialize global variables
+
+  last_serial_print_time = millis();
+
+  velocity_update_duration_sum = 0;
+  current_velocity_update_time = 0;
+  last_velocity_update_time = 0;
+  number_velocity_updates = 0;
+
+  // Initialize timer 2 for interrupts
   initialize_timer_2();
   
   Serial.println("Arduino Initialized successfully");
@@ -37,7 +73,7 @@ void setup()
 
 void loop()
 {
-  if (millis() - last_time > SERIAL_PRINT_TIME_PERIOD)
+  if (millis() - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
   {
     Serial.print("Velocity:\t");
     Serial.println(encoder_shaft.getAngularVelocity(), 5);
@@ -46,9 +82,9 @@ void loop()
     Serial.println(encoder_shaft.read());
 
     Serial.print("Average Velocity Update Period:\t");
-    Serial.println(duration_sum / num);
+    Serial.println(velocity_update_duration_sum / number_velocity_updates);
 
-    last_time = millis();
+    last_serial_print_time = millis();
   }
 }
 
@@ -56,22 +92,32 @@ void initialize_timer_2()
 {
   // stop interrupts
   cli();
+  
+  // Set timer2 to interrupt at 8kHz
 
-  // set timer2 interrupt at 8kHz
+  // ATmega2560 clock frequency - 16MHz
+  // Prescalers available for timers - 1, 8, 64, 256, 1024
+  // Timer clock frequency = ATmega2560 clock frequency / Prescaler
   
-  TCCR2A = 0; // set entire TCCR2A register to 0
-  TCCR2B = 0; // same for TCCR2B
-  TCNT2 = 0; // initialize counter value to 0
+  // To have interrupts with better frequency resolution timer
+  // will be operated in Clear Timer on Compare Match (CTC) mode
+  // TCNTx will count from 0x00 to the value in OCRnA register
+  // Frequency of Interrupt = Timer clock frequency / Number of TCNTn Counts before it resets to 0x00
+
+  // TCNTx will be compared to OCRnx in each clock cycle
+  // Upon compare match, interrupt is fired
+  // For 8kHz, TCNTx needs - 
+  //   - 250 counts at 8 prescaler
+  //   - 31.25 counts at 64 prescaler
   
-  // set compare match register for 8khz increments
-  OCR2A = 249; // = (16*10^6) / (8000*8) - 1 (must be <256)
-  
-  // turn on CTC mode
-  TCCR2A |= (1 << WGM21);
-  // Set CS21 bit for 8 prescaler
-  TCCR2B |= (1 << CS22); 
-  // enable timer compare interrupt
-  TIMSK2 |= (1 << OCIE2A);
+  // Turn on CTC mode
+  TCCR2A |= (0x01 << WGM21);
+  // Set Prescaler to 8
+  TCCR2B |= (0x01 << CS21);
+  // Set compare match register (OCR2A) to 249
+  OCR2A = 0xF9;
+  // Enable interrupt upon compare match of OCR2A
+  TIMSK2 |= (0x01 << OCIE2A);
 
   // allow interrupts
   sei();
@@ -79,10 +125,10 @@ void initialize_timer_2()
 
 ISR(TIMER2_COMPA_vect)
 {
-  current_time = micros();
-  duration_sum += current_time - last_update_time;
-  last_update_time = current_time;
-  num += 1;
+  current_velocity_update_time = micros();
+  velocity_update_duration_sum += current_velocity_update_time - last_velocity_update_time;
+  last_velocity_update_time = current_velocity_update_time;
+  number_velocity_updates += 1;
 
   encoder_shaft.updateAngularVelocity();
 }
