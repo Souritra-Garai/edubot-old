@@ -211,7 +211,7 @@ target_link_libraries(encoder_reading_node
 
 # Mark executable scripts (Python etc.) for installation
 # in contrast to setup.py, you can choose the destination
-catkin_install_python(PROGRAMS scripts/listener.py scripts/Motor_PWM_Response.py scripts/Motor_Pulse_Response.py
+catkin_install_python(PROGRAMS scripts/listener.py scripts/Motor_PWM_Response.py scripts/Motor_Pulse_Response.py scripts/Time_Period.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
