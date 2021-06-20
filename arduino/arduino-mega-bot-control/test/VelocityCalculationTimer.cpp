@@ -1,35 +1,47 @@
-#include "AngularVelocityCalculator.h"
-// #include "AngularVelocityCalculator.cpp"
+/* 
+  This is an example code to estimate angular velocity 
+  of a rotating shaft with an encoder attached to it,
+  using the AngularVelocityCalculator class.
 
+  The angular velocity is updated at frequency of 8 kHz,
+  using timer 2 interrupt. It is printed to serial monitor
+  at a much slower rate of 1Hz.
+*/
+
+#include "AngularVelocityCalculator.h"
+
+// Time interval after which angular velocity is
+// printed to serial monitor
 #define SERIAL_PRINT_TIME_PERIOD 1000
 
-angularVelocityCalculator encoderShaft(2, 3, 8000, 30);
+AngularVelocityCalculator encoder_shaft(2, 4, 8000, 560);
 
-long int lastTime;
+long int last_time;
 
-void initializeTimer2();
+void initialize_timer_2();
 
 void setup()
 {
   Serial.begin(9600);
-  lastTime = millis();
+  last_time = millis();
 
-  initializeTimer2();
+  initialize_timer_2();
   
   Serial.println("Arduino Initialized successfully");
 }
 
 void loop()
 {
-  if (millis() - lastTime > SERIAL_PRINT_TIME_PERIOD)
+  if (millis() - last_time > SERIAL_PRINT_TIME_PERIOD)
   {
-    Serial.println(encoderShaft.getAngularVelocity());
-    // Serial.println(encoderShaft.read());
-    lastTime = millis();
+    Serial.println(encoder_shaft.getAngularVelocity(), 5);
+    Serial.println(encoder_shaft.read());
+
+    last_time = millis();
   }
 }
 
-void initializeTimer2()
+void initialize_timer_2()
 {
   // stop interrupts
   cli();
@@ -50,11 +62,11 @@ void initializeTimer2()
   // enable timer compare interrupt
   TIMSK2 |= (1 << OCIE2A);
 
-  //allow interrupts
+  // allow interrupts
   sei();
 }
 
 ISR(TIMER2_COMPA_vect)
 {
-  encoderShaft.updateAngularVelocity();
+  encoder_shaft.updateAngularVelocity();
 }
