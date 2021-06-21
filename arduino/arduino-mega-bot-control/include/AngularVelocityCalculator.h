@@ -76,7 +76,7 @@ class AngularVelocityCalculator : public Encoder
 
         // Sets the value of the passed float variable angularVelocity
         // to latest angular velocity in radians per second
-        inline void getAngularVelocity(float angular_velocity) __attribute__((always_inline));
+        inline void getAngularVelocity(float &angular_velocity) __attribute__((always_inline));
         // Executes under 15 us
 };
 
@@ -133,7 +133,7 @@ void AngularVelocityCalculator::updateAngularVelocity()
 
 // Calculate and set the angular velocity from  
 // five encoder readings using a fifth order scheme
-void AngularVelocityCalculator::getAngularVelocity(float angular_velocity)
+void AngularVelocityCalculator::getAngularVelocity(float &angular_velocity)
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
@@ -165,15 +165,15 @@ void AngularVelocityCalculator::getAngularVelocity(float angular_velocity)
         //     encoder_readings_array_[1]
         // ) / (time_period_ * counts_per_rotation_);
         
-        Serial.print("Time Period:\t");
-        Serial.println(time_period_, 10);
-        Serial.print("Counts per Rotation:\t");
-        Serial.println(counts_per_rotation_);
-        Serial.println(encoder_readings_array_[0]);
-        Serial.println(encoder_readings_array_[1]);
-        Serial.println(encoder_readings_array_[2]);
-        Serial.println(encoder_readings_array_[3]);
-        Serial.println(encoder_readings_array_[4]);
+        // Serial.print("Time Period:\t");
+        // Serial.println(time_period_, 10);
+        // Serial.print("Counts per Rotation:\t");
+        // Serial.println(counts_per_rotation_);
+        // Serial.println(encoder_readings_array_[0]);
+        // Serial.println(encoder_readings_array_[1]);
+        // Serial.println(encoder_readings_array_[2]);
+        // Serial.println(encoder_readings_array_[3]);
+        // Serial.println(encoder_readings_array_[4]);
 
         // Atomic restorestate will restore the status
         // of interrupts to whatever it was before it stopped

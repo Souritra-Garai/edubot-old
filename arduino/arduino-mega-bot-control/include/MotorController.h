@@ -64,16 +64,16 @@ void MotorController::spinMotor()
     // Update the angular velocity as per the new 
     // captured position of the encoder.
     updateAngularVelocity();
-    angular_velocity_ = getAngularVelocity();
+    getAngularVelocity(angular_velocity_);
     
-    pid_output_ = getControllerOutput(angular_velocity_);
+    pid_output_ = round(getControllerOutput(angular_velocity_));
 
     // Write a HIGH or LOW value to the direction pin
-    digitalWrite(direction_pin_, pid_output_>0?HIGH:LOW);
+    digitalWrite(direction_pin_, pid_output_<0?HIGH:LOW);
 
     // Write the absolute value of PWM value on the PWM
     // pin.
-    analogWrite(PWM_pin_, abs(pid_output_));
+    analogWrite(PWM_pin_, min(abs(pid_output_),0xFF));
 }
 
 float MotorController::angVel()

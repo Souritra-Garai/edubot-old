@@ -5,7 +5,7 @@
 #define ENCODER_PIN_A 18
 #define ENCODER_PIN_B 20
 
-#define VELOCITY_UPDATE_FREQUENCY 1000 // Hz
+#define VELOCITY_UPDATE_FREQUENCY 488 // Hz
 #define ENCODER_COUNTS_PER_ROTATION 840
 
 #define PRINT_TIME_PERIOD 2000 // ms
@@ -21,6 +21,16 @@ MotorController motor_controller(
 
 
 long int last_print_time;
+float velocity_update_duration_sum;
+// Variable to store when the last velocity update 
+// was performed in microsecond
+float last_velocity_update_time;
+// Variable to fetch and store the time during
+// velocity update
+float current_velocity_update_time;
+// Variable to store the number of velocity updates 
+// that are performed
+float number_velocity_updates;
 
 void initialize_timer_2();
 
@@ -30,9 +40,16 @@ void setup()
 
   last_print_time = millis();
 
-  motor_controller.setPIDGains(5, 120, 0);
+  velocity_update_duration_sum = 0;
+  current_velocity_update_time = 0;
+  last_velocity_update_time = 0;
+  number_velocity_updates = 0;
+
+  motor_controller.setPIDGains(5, 0, 0);
 
   motor_controller.setTargetStateValue(10);
+
+  initialize_timer_2();
 
   Serial.println("Arduino Initialized successfully");
 }
@@ -41,13 +58,19 @@ void loop()
 {
   if (millis() - last_print_time > PRINT_TIME_PERIOD)
   {
-    motor_controller.spinMotor();
-    Serial.print("Velocity:\t");
-    Serial.println(motor_controller.angVel());
+    // motor_controller.spinMotor();
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+      Serial.print("Velocity:\t");
+      Serial.println(motor_controller.angVel());
 
-    Serial.print("PID output:\t");
-    Serial.println(motor_controller.pidOut());
-    Serial.println(motor_controller.getError());
+      Serial.print("PID output:\t");
+      Serial.println(motor_controller.pidOut());
+      Serial.println(motor_controller.getError());
+
+      Serial.print("Average Velocity Update Period:\t");
+      Serial.println(velocity_update_duration_sum / number_velocity_updates);
+    }
 
     last_print_time = millis();
   }
@@ -76,10 +99,11 @@ void initialize_timer_2()
   
   // Turn on CTC mode
   TCCR2A |= (0x01 << WGM21);
-  // Set Prescaler to 64
+  // Set Prescaler to 1024
   TCCR2B |= (0x01 << CS22);
-  // Set compare match register (OCR2A) to 249
-  OCR2A = 0xF9;
+  TCCR2B |= (0x01 << CS20);
+  // Set compare match register (OCR2A) to 
+  OCR2A = 0xF0;
   // Enable interrupt upon compare match of OCR2A
   TIMSK2 |= (0x01 << OCIE2A);
 
@@ -89,5 +113,9 @@ void initialize_timer_2()
 
 ISR(TIMER2_COMPA_vect)
 {
+  current_velocity_update_time = micros();
+  velocity_update_duration_sum += current_velocity_update_time - last_velocity_update_time;
+  last_velocity_update_time = current_velocity_update_time;
+  number_velocity_updates += 1;
   motor_controller.spinMotor();
 }
