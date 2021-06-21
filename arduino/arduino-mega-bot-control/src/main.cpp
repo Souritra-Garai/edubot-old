@@ -14,17 +14,18 @@
 // printed to serial monitor
 #define SERIAL_PRINT_TIME_PERIOD 1000
 
-#define ENCODER_PIN_A 2
-#define ENCODER_PIN_B 4
+// #define ENCODER_PIN_A 
+// #define ENCODER_PIN_B 19
 
-#define VELOCITY_UPDATE_FREQUENCY 8E3 // Hz
+
+
+#define VELOCITY_UPDATE_FREQUENCY 1000 // Hz
 
 #define ENCODER_COUNTS_PER_ROTATION 840
 
 // Our object to estimate the angular velocity of encoder shaft
 AngularVelocityCalculator encoder_shaft(
-  ENCODER_PIN_A,
-  ENCODER_PIN_B,
+  21, 19,
   VELOCITY_UPDATE_FREQUENCY,
   ENCODER_COUNTS_PER_ROTATION
 );
@@ -36,16 +37,16 @@ long int last_serial_print_time;
 // To verify the time period of velocity update
 // Variable to store the sum of durations in microseconds
 // after which velocity is updated
-float velocity_update_duration_sum;
+float velocity_update_duration_sum = 0;
 // Variable to store when the last velocity update 
 // was performed in microsecond
-float last_velocity_update_time;
+float last_velocity_update_time = 0;
 // Variable to fetch and store the time during
 // velocity update
-float current_velocity_update_time;
+float current_velocity_update_time = 0;
 // Variable to store the number of velocity updates 
 // that are performed
-float number_velocity_updates;
+float number_velocity_updates = 0;
 
 // Declaration of function for initializing Timer 2
 // interrupts
@@ -59,11 +60,10 @@ void setup()
   // Initialize global variables
 
   last_serial_print_time = millis();
+  last_velocity_update_time = micros();
 
-  velocity_update_duration_sum = 0;
-  current_velocity_update_time = 0;
-  last_velocity_update_time = 0;
-  number_velocity_updates = 0;
+  // velocity_update_duration_sum = 0;
+  // number_velocity_updates = 0;
 
   // Initialize timer 2 for interrupts
   initialize_timer_2();
@@ -73,10 +73,24 @@ void setup()
 
 void loop()
 {
+  current_velocity_update_time = micros();
+
+  // if (current_velocity_update_time - last_velocity_update_time > 125)
+  // {
+  //   // current_velocity_update_time = micros();
+  //   velocity_update_duration_sum += current_velocity_update_time - last_velocity_update_time;
+  //   last_velocity_update_time = current_velocity_update_time;
+  //   number_velocity_updates += 1;
+
+  //   encoder_shaft.updateAngularVelocity();
+  // }
+
   if (millis() - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
   {
+    float angularVelocity = encoder_shaft.getAngularVelocity();
+
     Serial.print("Velocity:\t");
-    Serial.println(encoder_shaft.getAngularVelocity(), 5);
+    Serial.println(angularVelocity, 5);
     
     Serial.print("Encoder shaft position:\t");
     Serial.println(encoder_shaft.read());
@@ -93,7 +107,13 @@ void initialize_timer_2()
   // stop interrupts
   cli();
   
-  // Set timer2 to interrupt at 8kHz
+  // Clear the Timer/Counter Control Registers
+  TCCR2A &= 0x00;
+  TCCR2B &= 0x00;
+  // Clear the Timer/Counter Register
+  TCNT0 &= 0x00;
+
+  // Set timer2 to interrupt at 1kHz
 
   // ATmega2560 clock frequency - 16MHz
   // Prescalers available for timers - 1, 8, 64, 256, 1024
@@ -106,14 +126,13 @@ void initialize_timer_2()
 
   // TCNTx will be compared to OCRnx in each clock cycle
   // Upon compare match, interrupt is fired
-  // For 8kHz, TCNTx needs - 
-  //   - 250 counts at 8 prescaler
-  //   - 31.25 counts at 64 prescaler
+  // For 1kHz, TCNTx needs - 
+  //   - 250 counts at 64 prescaler
   
   // Turn on CTC mode
   TCCR2A |= (0x01 << WGM21);
-  // Set Prescaler to 8
-  TCCR2B |= (0x01 << CS21);
+  // Set Prescaler to 64
+  TCCR2B |= (0x01 << CS22);
   // Set compare match register (OCR2A) to 249
   OCR2A = 0xF9;
   // Enable interrupt upon compare match of OCR2A
