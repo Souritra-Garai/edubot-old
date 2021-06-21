@@ -14,17 +14,18 @@
 // printed to serial monitor
 #define SERIAL_PRINT_TIME_PERIOD 1000
 
-#define ENCODER_PIN_A 2
-#define ENCODER_PIN_B 4
+// #define ENCODER_PIN_A 
+// #define ENCODER_PIN_B 19
 
-#define VELOCITY_UPDATE_FREQUENCY 8E3 // Hz
+
+
+#define VELOCITY_UPDATE_FREQUENCY 1000 // Hz
 
 #define ENCODER_COUNTS_PER_ROTATION 840
 
 // Our object to estimate the angular velocity of encoder shaft
 AngularVelocityCalculator encoder_shaft(
-  ENCODER_PIN_A,
-  ENCODER_PIN_B,
+  21, 19,
   VELOCITY_UPDATE_FREQUENCY,
   ENCODER_COUNTS_PER_ROTATION
 );
@@ -94,8 +95,8 @@ void loop()
     Serial.print("Encoder shaft position:\t");
     Serial.println(encoder_shaft.read());
 
-    // Serial.print("Average Velocity Update Period:\t");
-    // Serial.println(velocity_update_duration_sum / number_velocity_updates);
+    Serial.print("Average Velocity Update Period:\t");
+    Serial.println(velocity_update_duration_sum / number_velocity_updates);
 
     last_serial_print_time = millis();
   }
@@ -112,7 +113,7 @@ void initialize_timer_2()
   // Clear the Timer/Counter Register
   TCNT0 &= 0x00;
 
-  // Set timer2 to interrupt at 8kHz
+  // Set timer2 to interrupt at 1kHz
 
   // ATmega2560 clock frequency - 16MHz
   // Prescalers available for timers - 1, 8, 64, 256, 1024
@@ -125,15 +126,13 @@ void initialize_timer_2()
 
   // TCNTx will be compared to OCRnx in each clock cycle
   // Upon compare match, interrupt is fired
-  // For 8kHz, TCNTx needs - 
-  //   - 250 counts at 8 prescaler
-  //   - 31.25 counts at 64 prescaler
+  // For 1kHz, TCNTx needs - 
+  //   - 250 counts at 64 prescaler
   
   // Turn on CTC mode
   TCCR2A |= (0x01 << WGM21);
-  // Set Prescaler to 8
-  TCCR2B |= (0x01 << CS21);
-  // TCCR2B |= (0x01 << CS20);
+  // Set Prescaler to 64
+  TCCR2B |= (0x01 << CS22);
   // Set compare match register (OCR2A) to 249
   OCR2A = 0xF9;
   // Enable interrupt upon compare match of OCR2A
@@ -145,10 +144,10 @@ void initialize_timer_2()
 
 ISR(TIMER2_COMPA_vect)
 {
-  // current_velocity_update_time = micros();
-  // velocity_update_duration_sum += current_velocity_update_time - last_velocity_update_time;
-  // last_velocity_update_time = current_velocity_update_time;
-  // number_velocity_updates += 1;
+  current_velocity_update_time = micros();
+  velocity_update_duration_sum += current_velocity_update_time - last_velocity_update_time;
+  last_velocity_update_time = current_velocity_update_time;
+  number_velocity_updates += 1;
 
   encoder_shaft.updateAngularVelocity();
 }
