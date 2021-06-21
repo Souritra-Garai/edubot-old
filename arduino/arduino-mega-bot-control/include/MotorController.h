@@ -35,6 +35,9 @@ class MotorController : public AngularVelocityCalculator, public PID
         // Update the PWM values 
         inline void spinMotor() __attribute__((always_inline));
 
+        float angVel();
+        float pidOut();
+
         // Constructor
         // PWMpin - Pin no. on which absolute value of PWM is to be written
         // directionPin - Pin no. on which sign (HIGH or LOW) of PWM value is to be written
@@ -71,6 +74,16 @@ void MotorController::spinMotor()
     // Write the absolute value of PWM value on the PWM
     // pin.
     analogWrite(PWM_pin_, abs(pid_output_));
+}
+
+float MotorController::angVel()
+{
+    return angular_velocity_;
+}
+
+float MotorController::pidOut()
+{
+    return pid_output_;
 }
 
 // Constructor

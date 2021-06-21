@@ -57,6 +57,10 @@ class PID
         // The post-fix __attribute__((always_inline)) ensures
         // the function is definitely inlined by compiler.
 
+        float getError()
+        {
+            return last_error_;
+        }
         // Change the set point
         // target_state_value - 
         void setTargetStateValue(float target_state_value);
