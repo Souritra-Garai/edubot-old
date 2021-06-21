@@ -74,8 +74,9 @@ class AngularVelocityCalculator : public Encoder
         // the function is definitely inlined by compiler.
         // Executes under 15 us
 
-        // Returns latest angular velocity in radians per second
-        inline float getAngularVelocity() __attribute__((always_inline));
+        // Sets the value of the passed float variable angularVelocity
+        // to latest angular velocity in radians per second
+        inline void getAngularVelocity(float angular_velocity) __attribute__((always_inline));
         // Executes under 15 us
 };
 
@@ -130,11 +131,10 @@ void AngularVelocityCalculator::updateAngularVelocity()
     encoder_readings_array_[0] = (float) read();
 }
 
-// Calculate and return the angular velocity from  
+// Calculate and set the angular velocity from  
 // five encoder readings using a fifth order scheme
-float AngularVelocityCalculator::getAngularVelocity()
+void AngularVelocityCalculator::getAngularVelocity(float angular_velocity)
 {
-    float angular_velocity;
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
         // Atomic block prevents any interrupts from
@@ -178,8 +178,7 @@ float AngularVelocityCalculator::getAngularVelocity()
         // Atomic restorestate will restore the status
         // of interrupts to whatever it was before it stopped
         // all interrupts, i.e. enabled / disabled.
-    }    
-    return angular_velocity;
+    }
 }
 
 #endif
