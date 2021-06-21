@@ -123,7 +123,6 @@ void AngularVelocityCalculator::updateAngularVelocity()
     // memmove(&encoderReadingsArray[1], &encoderReadingsArray[0], 4*sizeof(float));
     // As encoder_readings_array_ is declared as volatile,
     // memmove function cannot be used
-
     encoder_readings_array_[4] = encoder_readings_array_[3];
     encoder_readings_array_[3] = encoder_readings_array_[2];
     encoder_readings_array_[2] = encoder_readings_array_[1];
@@ -142,13 +141,22 @@ float AngularVelocityCalculator::getAngularVelocity()
         // stopping the initializing task
         
         // Estimate angular velocity using 5th order scheme
-        angular_velocity = 60 * (
+        angular_velocity = 2 * PI * (
             25.0f * encoder_readings_array_[0] -
             48.0f * encoder_readings_array_[1] +
             36.0f * encoder_readings_array_[2] -
             16.0f * encoder_readings_array_[3] +
             3.0f  * encoder_readings_array_[4]
         ) / (12.0f * time_period_ * counts_per_rotation_);
+
+        // Bharg's Formula
+        // angular_velocity = 2 * PI * (
+        //     -200.0f * encoder_readings_array_[0] -
+        //     -100.0f * encoder_readings_array_[1] +
+        //     0.0f    * encoder_readings_array_[2] -
+        //     100.0f  * encoder_readings_array_[3] +
+        //     200.0f  * encoder_readings_array_[4]
+        // ) / 560.0f;
         
         // // For debug, simple 1st Order backward scheme
         // // to estimate velocity
@@ -156,16 +164,21 @@ float AngularVelocityCalculator::getAngularVelocity()
         //     encoder_readings_array_[0] -
         //     encoder_readings_array_[1]
         // ) / (time_period_ * counts_per_rotation_);
+        
+        Serial.print("Time Period:\t");
+        Serial.println(time_period_, 10);
+        Serial.print("Counts per Rotation:\t");
+        Serial.println(counts_per_rotation_);
+        Serial.println(encoder_readings_array_[0]);
+        Serial.println(encoder_readings_array_[1]);
+        Serial.println(encoder_readings_array_[2]);
+        Serial.println(encoder_readings_array_[3]);
+        Serial.println(encoder_readings_array_[4]);
 
         // Atomic restorestate will restore the status
         // of interrupts to whatever it was before it stopped
         // all interrupts, i.e. enabled / disabled.
-    }
-    
-    // Serial.print("Time Period:\t");
-    // Serial.println(time_period_, 10);
-    // Serial.print("Counts per Rotation:\t");
-    // Serial.println(counts_per_rotation_);
+    }    
     return angular_velocity;
 }
 
