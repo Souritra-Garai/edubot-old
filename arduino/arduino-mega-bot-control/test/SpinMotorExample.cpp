@@ -15,13 +15,12 @@ MotorController motor_controller(
   DIRECTION_PIN,
   ENCODER_PIN_A,
   ENCODER_PIN_B,
-  500,
+  VELOCITY_UPDATE_FREQUENCY,
   ENCODER_COUNTS_PER_ROTATION
 );
 
 
 long int last_print_time;
-long int last_vel_update_time;
 
 void initialize_timer_2();
 
@@ -29,9 +28,6 @@ void setup()
 {
   Serial.begin(9600);
 
-  initialize_timer_2();
-
-  last_vel_update_time = micros();
   last_print_time = millis();
 
   motor_controller.setPIDGains(5, 120, 0);
@@ -43,13 +39,6 @@ void setup()
 
 void loop()
 {
-  if (micros() - last_vel_update_time > 2000)
-  {
-    motor_controller.spinMotor();
-
-    last_vel_update_time = micros();
-  }
-
   if (millis() - last_print_time > PRINT_TIME_PERIOD)
   {
     motor_controller.spinMotor();
@@ -89,7 +78,6 @@ void initialize_timer_2()
   TCCR2A |= (0x01 << WGM21);
   // Set Prescaler to 64
   TCCR2B |= (0x01 << CS22);
-  TCCR2B |= (0x01 << CS20);
   // Set compare match register (OCR2A) to 249
   OCR2A = 0xF9;
   // Enable interrupt upon compare match of OCR2A

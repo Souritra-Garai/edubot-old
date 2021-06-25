@@ -76,7 +76,7 @@ void loop()
   if (millis() - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
   {
     Serial.print("Velocity:\t");
-    Serial.println(encoder_shaft.getAngularVelocity(), 5);
+    // Serial.println(encoder_shaft.getAngularVelocity(), 5);
     
     Serial.print("Encoder shaft position:\t");
     Serial.println(encoder_shaft.read());
