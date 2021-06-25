@@ -12,12 +12,12 @@
 
 // Time interval after which anything is
 // printed to serial monitor
-#define SERIAL_PRINT_TIME_PERIOD 1000
+#define SERIAL_PRINT_TIME_PERIOD 2000
 
-#define ENCODER_PIN_A 2
-#define ENCODER_PIN_B 4
+#define ENCODER_PIN_A 19
+#define ENCODER_PIN_B 21
 
-#define VELOCITY_UPDATE_FREQUENCY 8E3 // Hz
+#define VELOCITY_UPDATE_FREQUENCY 1E3 // Hz
 
 #define ENCODER_COUNTS_PER_ROTATION 840
 
@@ -54,7 +54,7 @@ void initialize_timer_2();
 void setup()
 {
   // Initialize Serial Comm
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Initialize global variables
 
@@ -75,8 +75,10 @@ void loop()
 {
   if (millis() - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
   {
+    float angular_velocity;
+    encoder_shaft.getAngularVelocity(angular_velocity);
     Serial.print("Velocity:\t");
-    Serial.println(encoder_shaft.getAngularVelocity(), 5);
+    Serial.println(angular_velocity, 5);
     
     Serial.print("Encoder shaft position:\t");
     Serial.println(encoder_shaft.read());
@@ -92,6 +94,12 @@ void initialize_timer_2()
 {
   // stop interrupts
   cli();
+
+  // Clear Timer/Counter Control Resgisters
+  TCCR2A &= 0x00;
+  TCCR2B &= 0x00;
+  // Clear Timer/Counter Register
+  TCNT2 &= 0x00;
   
   // Set timer2 to interrupt at 8kHz
 
@@ -113,7 +121,7 @@ void initialize_timer_2()
   // Turn on CTC mode
   TCCR2A |= (0x01 << WGM21);
   // Set Prescaler to 8
-  TCCR2B |= (0x01 << CS21);
+  TCCR2B |= (0x01 << CS22);
   // Set compare match register (OCR2A) to 249
   OCR2A = 0xF9;
   // Enable interrupt upon compare match of OCR2A
