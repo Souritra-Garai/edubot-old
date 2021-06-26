@@ -5,7 +5,7 @@
 #define ENCODER_PIN_A 18
 #define ENCODER_PIN_B 20
 
-#define VELOCITY_UPDATE_FREQUENCY 1000 // Hz
+#define VELOCITY_UPDATE_FREQUENCY 50 // Hz
 #define ENCODER_COUNTS_PER_ROTATION 840
 
 #define PRINT_TIME_PERIOD 2000 // ms
@@ -15,7 +15,7 @@ MotorController motor_controller(
   DIRECTION_PIN,
   ENCODER_PIN_A,
   ENCODER_PIN_B,
-  500,
+  VELOCITY_UPDATE_FREQUENCY,
   ENCODER_COUNTS_PER_ROTATION
 );
 
@@ -29,12 +29,12 @@ void setup()
 {
   Serial.begin(9600);
 
-  initialize_timer_2();
+  // initialize_timer_2();
 
-  last_vel_update_time = micros();
+  last_vel_update_time = millis();
   last_print_time = millis();
 
-  motor_controller.setPIDGains(5, 120, 0);
+  motor_controller.setPIDGains(15, 120, 0);
 
   motor_controller.setTargetStateValue(10);
 
@@ -43,21 +43,22 @@ void setup()
 
 void loop()
 {
-  if (micros() - last_vel_update_time > 2000)
+  if (millis() - last_vel_update_time > 1000/VELOCITY_UPDATE_FREQUENCY)
   {
     motor_controller.spinMotor();
 
-    last_vel_update_time = micros();
+    last_vel_update_time = millis();
   }
 
   if (millis() - last_print_time > PRINT_TIME_PERIOD)
   {
-    motor_controller.spinMotor();
     Serial.print("Velocity:\t");
     Serial.println(motor_controller.angVel());
 
     Serial.print("PID output:\t");
     Serial.println(motor_controller.pidOut());
+
+    Serial.print("Error: ");
     Serial.println(motor_controller.getError());
 
     last_print_time = millis();

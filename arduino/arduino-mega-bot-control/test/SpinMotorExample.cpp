@@ -1,3 +1,12 @@
+/*
+  This is an example for running the PID controls 
+  for a target velocity.
+
+  The angular velocity is updated at a rate of 50Hz.
+  PID output and angular velocity is printed at every 
+  2000 ms rate.
+*/
+
 #include "MotorController.h"
 
 #define PWM_PIN 11
@@ -5,11 +14,15 @@
 #define ENCODER_PIN_A 18
 #define ENCODER_PIN_B 20
 
-#define VELOCITY_UPDATE_FREQUENCY 1000 // Hz
+// Frequency at which velocity is updated
+#define VELOCITY_UPDATE_FREQUENCY 50 // Hz
 #define ENCODER_COUNTS_PER_ROTATION 840
 
+// Time interval at which anything is printed
+// to serial monitor.
 #define PRINT_TIME_PERIOD 2000 // ms
 
+// Our object for motor controller
 MotorController motor_controller(
   PWM_PIN,
   DIRECTION_PIN,
@@ -19,19 +32,29 @@ MotorController motor_controller(
   ENCODER_COUNTS_PER_ROTATION
 );
 
-
+// Variable to store the last time anything was
+// printed through the serial port in millisecond.
 long int last_print_time;
+long int last_vel_update_time;
+// Variable to store the last time the angular 
+// velocity was updated in millisecond.
 
 void initialize_timer_2();
 
 void setup()
 {
+  // Initialise Serial Comm
   Serial.begin(9600);
 
+  // initialize_timer_2();
+
+  last_vel_update_time = millis();
   last_print_time = millis();
 
-  motor_controller.setPIDGains(5, 120, 0);
+  // Set PID gains to P=15, I=120 and D=0 
+  motor_controller.setPIDGains(15, 120, 0);
 
+  // Set target angular velocity
   motor_controller.setTargetStateValue(10);
 
   Serial.println("Arduino Initialized successfully");
@@ -39,14 +62,22 @@ void setup()
 
 void loop()
 {
-  if (millis() - last_print_time > PRINT_TIME_PERIOD)
+  if (millis() - last_vel_update_time > 1000/VELOCITY_UPDATE_FREQUENCY)
   {
     motor_controller.spinMotor();
+
+    last_vel_update_time = millis();
+  }
+
+  if (millis() - last_print_time > PRINT_TIME_PERIOD)
+  {
     Serial.print("Velocity:\t");
     Serial.println(motor_controller.angVel());
 
     Serial.print("PID output:\t");
     Serial.println(motor_controller.pidOut());
+
+    Serial.print("Error: ");
     Serial.println(motor_controller.getError());
 
     last_print_time = millis();
@@ -78,6 +109,7 @@ void initialize_timer_2()
   TCCR2A |= (0x01 << WGM21);
   // Set Prescaler to 64
   TCCR2B |= (0x01 << CS22);
+  TCCR2B |= (0x01 << CS20);
   // Set compare match register (OCR2A) to 249
   OCR2A = 0xF9;
   // Enable interrupt upon compare match of OCR2A
