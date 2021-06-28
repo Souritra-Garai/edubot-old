@@ -19,7 +19,6 @@ MotorController motor_controller(
   ENCODER_COUNTS_PER_ROTATION
 );
 
-
 long int last_print_time;
 long int last_vel_update_time;
 
@@ -30,7 +29,7 @@ void setup()
   Serial.begin(9600);
 
   // initialize_timer_2();
-
+  
   last_vel_update_time = millis();
   last_print_time = millis();
 
@@ -69,6 +68,12 @@ void initialize_timer_2()
 {
   // stop interrupts
   cli();
+
+  // Clear Timer/Counter Control Resgisters
+  TCCR2A &= 0x00;
+  TCCR2B &= 0x00;
+  // Clear Timer/Counter Register
+  TCNT2 &= 0x00;
   
   // Set timer2 to interrupt at 8kHz
 
@@ -83,12 +88,13 @@ void initialize_timer_2()
 
   // TCNTx will be compared to OCRnx in each clock cycle
   // Upon compare match, interrupt is fired
-  // For 1kHz, TCNTx needs - 
-  //   - 250 counts at 64 prescaler
+  // For 8kHz, TCNTx needs - 
+  //   - 250 counts at 8 prescaler
+  //   - 31.25 counts at 64 prescaler
   
   // Turn on CTC mode
   TCCR2A |= (0x01 << WGM21);
-  // Set Prescaler to 64
+  // Set Prescaler to 8
   TCCR2B |= (0x01 << CS22);
   TCCR2B |= (0x01 << CS20);
   // Set compare match register (OCR2A) to 249

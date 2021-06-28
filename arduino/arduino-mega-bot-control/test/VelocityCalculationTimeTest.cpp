@@ -10,6 +10,8 @@
 #define VELOCITY_GET_TIME_PERIOD 5000
 #define VELOCITY_UPDATE_TIME_PERIOD 500
 
+float angular_velocity;
+
 AngularVelocityCalculator encoder_shaft(2, 3, 1 / VELOCITY_UPDATE_TIME_PERIOD, 560);
 
 long int last_serial_print_time;
@@ -59,12 +61,12 @@ void loop()
     Serial.print("Time taken for Velocity Update :\tMean\t");
     Serial.print(mean_velocity_update_time);
     Serial.print("\tStd Dev\t");
-    Serial.print(std_dev_velocity_update_time);
+    Serial.println(std_dev_velocity_update_time);
 
     Serial.print("Time taken for Velocity Get :\tMean\t");
     Serial.print(mean_velocity_get_time);
     Serial.print("\tStd Dev\t");
-    Serial.print(std_dev_velocity_get_time);    
+    Serial.println(std_dev_velocity_get_time);    
     
     last_serial_print_time = millis();
   }
@@ -85,7 +87,7 @@ void loop()
   if (micros() - last_velocity_get_time > VELOCITY_GET_TIME_PERIOD)
   {
     start_time = micros();
-    encoder_shaft.updateAngularVelocity();
+    encoder_shaft.getAngularVelocity(angular_velocity);
     duration = micros() - start_time;
 
     velocity_get_time_period_sum += duration;

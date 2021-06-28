@@ -54,7 +54,7 @@ void initialize_timer_2();
 void setup()
 {
   // Initialize Serial Comm
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Initialize global variables
 
@@ -75,8 +75,10 @@ void loop()
 {
   if (millis() - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
   {
+    float angular_velocity;
+    encoder_shaft.getAngularVelocity(angular_velocity);
     Serial.print("Velocity:\t");
-    // Serial.println(encoder_shaft.getAngularVelocity(), 5);
+    Serial.println(angular_velocity, 5);
     
     Serial.print("Encoder shaft position:\t");
     Serial.println(encoder_shaft.read());
@@ -92,6 +94,12 @@ void initialize_timer_2()
 {
   // stop interrupts
   cli();
+
+  // Clear Timer/Counter Control Resgisters
+  TCCR2A &= 0x00;
+  TCCR2B &= 0x00;
+  // Clear Timer/Counter Register
+  TCNT2 &= 0x00;
   
   // Set timer2 to interrupt at 8kHz
 
