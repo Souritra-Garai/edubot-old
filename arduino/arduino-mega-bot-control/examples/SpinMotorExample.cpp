@@ -28,7 +28,6 @@
 
 /**
  * @brief Time interval at which anything is printed to serial monitor.
-
  * 
  */
 #define PRINT_TIME_PERIOD 2000 // ms

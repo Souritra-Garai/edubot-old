@@ -166,7 +166,6 @@ direction_pin_(direction_pin)
 {   
     /**
      * @brief Initilize all the private variables to zero
-     * 
      */
     angular_velocity_ = 0;
     pid_output_ = 0;
