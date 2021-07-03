@@ -1,27 +1,50 @@
-/* 
-  This is an example code to estimate angular velocity 
-  of a rotating shaft with an encoder attached to it,
-  using the AngularVelocityCalculator class.
-
-  The angular velocity is updated at frequency of 8 kHz,
-  using timer 2 interrupt. It is printed to serial monitor
-  at a much slower rate of 1Hz.
-*/
+/**
+ * @file VelocityCalculationTimer.cpp
+ * @author Souritra Garai (souritra.garai@iitgn.ac.in)
+ * @brief This is an example code to estimate angular velocity 
+ * of a rotating shaft with an encoder attached to it,
+ * using the AngularVelocityCalculator class.
+ * 
+ * The angular velocity is updated at frequency of 8 kHz,
+ * using timer 2 interrupt. It is printed to serial monitor
+ * at a much slower rate of 1Hz.
+ * 
+ * @version 0.1
+ * @date 2021-06-30
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 
 #include "AngularVelocityCalculator.h"
 
-// Time interval after which anything is
-// printed to serial monitor
+/**
+ * @brief Time interval after which anything is
+ * printed to serial monitor
+ */
 #define SERIAL_PRINT_TIME_PERIOD 1000 // ms
 
+/**
+ * @brief Encoder outputs attached to these
+ * interrupt pins on the Arduino Mega board
+ */
 #define ENCODER_PIN_A 21
 #define ENCODER_PIN_B 19
 
+/**
+ * @brief Frequency at which velocity will be updated
+ */
 #define VELOCITY_UPDATE_FREQUENCY 1000 // Hz
 
+/**
+ * @brief Number of quadrature counts to complete
+ * one full rotation of the shaft
+ */
 #define ENCODER_COUNTS_PER_ROTATION 840
 
-// Our object to estimate the angular velocity of encoder shaft
+/**
+ * @brief Our object to estimate the angular velocity of encoder shaft
+ */
 AngularVelocityCalculator encoder_shaft(
   ENCODER_PIN_A,
   ENCODER_PIN_B,
@@ -29,31 +52,51 @@ AngularVelocityCalculator encoder_shaft(
   ENCODER_COUNTS_PER_ROTATION
 );
 
-// To store the last time anything was
-// printed through serial port in millisecond
+/**
+ * @brief To store the last time anything was
+ * printed through serial port in millisecond
+ */
 long int last_serial_print_time;
 
-// To verify the time period of velocity update
-// Variable to store the sum of durations in microseconds
-// after which velocity is updated
+/**
+ * @brief To verify the time period of velocity update 
+ */
+
+/**
+ * @brief Variable to store the sum of durations in 
+ * microseconds after which velocity is updated
+ */
 float velocity_update_duration_sum;
-// Variable to store when the last velocity update 
-// was performed in microsecond
+
+/**
+ * @brief Variable to store when the last velocity update 
+ * was performed in microsecond
+ */
 float last_velocity_update_time;
-// Variable to fetch and store the time during
-// velocity update
+
+/**
+ * @brief Variable to fetch and store the time during
+ * velocity update
+ */
 float current_velocity_update_time;
-// Variable to store the number of velocity updates 
-// that are performed
+
+/**
+ * @brief Variable to store the number of velocity updates 
+ * that are performed
+ */
 float number_velocity_updates;
 
-// Declaration of function for initializing Timer 2
-// interrupts
+/**
+ * @brief Declaration of function for initializing Timer 2
+ * interrupts
+ */
 void initialize_timer_2();
 
 void setup()
 {
-  // Initialize Serial Comm
+  /**
+   * @brief Initialize Serial Comm
+   */
   Serial.begin(115200);
 
   // Initialize global variables
