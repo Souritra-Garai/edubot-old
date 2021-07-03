@@ -44,13 +44,4 @@ void PID::setPIDGains(
     differential_gain_ = differential_gain;
 }
 
-// Set the value of internal variable for
-// target state to the requested value
-void PID::setTargetStateValue(
-    float target_state_value
-)
-{
-    target_state_value_ = target_state_value;
-}
-
 
