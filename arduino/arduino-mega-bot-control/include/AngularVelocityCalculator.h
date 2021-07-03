@@ -99,16 +99,18 @@ class AngularVelocityCalculator : public Encoder
          * to capture a new position reading of the encoder
          * 
          * When inlined by compiler, it executes under 15 us
+         * The post-fix __attribute__((always_inline)) ensures
+         * the function is definitely inlined by compiler.
          */
         inline void updateAngularVelocity() __attribute__((always_inline));
-        // The post-fix __attribute__((always_inline)) ensures
-        // the function is definitely inlined by compiler.
 
         /**
          * @brief Set the value of the variable passed by reference 
          * - angular_velocity to the current estimated angular velocity
          * 
          * When inlined by compiler, it executes under 15 us
+         * The post-fix __attribute__((always_inline)) ensures
+         * the function is definitely inlined by compiler.
          * 
          * @param angular_velocity Variable to which the value of current angular
          * velocity is set

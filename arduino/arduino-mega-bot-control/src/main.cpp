@@ -52,10 +52,10 @@ void loop()
   if (millis() - last_print_time > PRINT_TIME_PERIOD)
   {
     Serial.print("Velocity:\t");
-    Serial.println(motor_controller.angVel());
+    Serial.println(motor_controller.getMotorAngularVelocity());
 
     Serial.print("PID output:\t");
-    Serial.println(motor_controller.pidOut());
+    Serial.println(motor_controller.getPIDControlOutput());
 
     Serial.print("Error: ");
     Serial.println(motor_controller.getError());
