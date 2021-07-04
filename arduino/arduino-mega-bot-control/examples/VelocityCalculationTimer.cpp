@@ -90,7 +90,9 @@ void initializeTimer1();
 
 void setup()
 {
-  // Initialize Serial Comm
+  /**
+   * @brief Initialize Serial Comm
+   */
   Serial.begin(115200);
 
   // Initialize global variables
