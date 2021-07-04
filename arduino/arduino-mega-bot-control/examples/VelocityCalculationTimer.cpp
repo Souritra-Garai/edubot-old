@@ -4,7 +4,7 @@
  * @brief This is an example code to estimate angular velocity 
  * of a rotating shaft with an encoder attached to it,
  * using the AngularVelocityCalculator class.
- * 
+ *
  * The angular velocity is updated at frequency of 50 Hz,
  * using Timer 1 interrupt. It is printed to serial monitor
  * at a much slower rate of 1Hz.
@@ -33,7 +33,6 @@
  * @brief Frequency at which velocity will be updated
  */
 #define VELOCITY_UPDATE_FREQUENCY 50 // Hz
-
 /**
  * @brief Number of quadrature counts to complete
  * one full rotation of the shaft
@@ -127,7 +126,6 @@ void loop()
   }
 }
 
-
 void initializeTimer1()
 {
   // stop interrupts
@@ -140,7 +138,7 @@ void initializeTimer1()
   // Clear Timer/Counter Register
   TCNT1 &= 0x0000;
   
-  // Set Timer1 to interrupt at 8kHz
+  // Set Timer1 to interrupt at 50 Hz
 
   // ATmega2560 clock frequency - 16MHz
   // Prescalers available for timers - 1, 8, 64, 256, 1024
@@ -153,6 +151,7 @@ void initializeTimer1()
 
   // TCNTx will be compared to OCRnx in each clock cycle
   // Upon compare match, interrupt is fired
+
   // For 50Hz, TCNTx needs - 
   //   - 40000 counts at 8 prescaler
   //   - 5000 counts at 64 prescaler

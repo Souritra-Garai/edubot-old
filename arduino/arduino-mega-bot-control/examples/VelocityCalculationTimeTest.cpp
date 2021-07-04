@@ -21,6 +21,7 @@ float angular_velocity;
 
 AngularVelocityCalculator encoder_shaft(21, 19, 1 / VELOCITY_UPDATE_TIME_PERIOD, 560);
 
+
 long int last_serial_print_time;
 long int last_velocity_get_time;
 long int last_velocity_update_time;
@@ -39,6 +40,7 @@ double duration;
 void setup()
 {
   Serial.begin(115200);
+
   last_serial_print_time = millis();
   last_velocity_get_time = micros();
   last_velocity_update_time = micros();
@@ -69,7 +71,7 @@ void loop()
     Serial.print(mean_velocity_update_time);
     Serial.print("\tStd Dev\t");
     Serial.println(std_dev_velocity_update_time);
-
+    
     Serial.print("Time taken for Velocity Get :\t\tMean\t");
     Serial.print(mean_velocity_get_time);
     Serial.print("\tStd Dev\t");
