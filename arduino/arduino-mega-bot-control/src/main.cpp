@@ -1,15 +1,19 @@
 /**
- * @file VelocityCalculationTimeTest.cpp
- * @author Souritra Garai (souritra.garai@iitgn.ac.in)
- * @brief This is an example code to measure the time taken for the
- * updateAngularVelocity and getAngularVelocity class methods of
- * AngularVelocityCalculator class to execute.
+ * @file main.cpp
+ * @author your name (you@domain.com)
+ * @brief 
  * @version 0.1
  * @date 2021-07-04
  * 
  * @copyright Copyright (c) 2021
  * 
  */
+
+/*
+  This is an example code to measure the time taken for the
+  updateAngularVelocity and getAngularVelocity class methods of
+  AngularVelocityCalculator class to execute.
+*/
 
 #include "AngularVelocityCalculator.h"
 

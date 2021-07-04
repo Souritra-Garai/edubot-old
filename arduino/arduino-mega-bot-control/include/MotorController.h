@@ -161,7 +161,6 @@ MotorController::MotorController(
     direction_pin_(direction_pin)
 {   
     // Initialize angular_velocity and PID output to zero
-
     angular_velocity_ = 0;
     PID_output_ = 0;
 }
