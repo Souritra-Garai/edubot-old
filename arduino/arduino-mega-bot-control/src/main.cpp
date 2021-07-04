@@ -1,112 +1,110 @@
-#include "MotorController.h"
+/**
+ * @file main.cpp
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2021-07-04
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 
-#define PWM_PIN 11
-#define DIRECTION_PIN 22
-#define ENCODER_PIN_A 18
-#define ENCODER_PIN_B 20
+/*
+  This is an example code to measure the time taken for the
+  updateAngularVelocity and getAngularVelocity class methods of
+  AngularVelocityCalculator class to execute.
+*/
 
-#define VELOCITY_UPDATE_FREQUENCY 50 // Hz
-#define ENCODER_COUNTS_PER_ROTATION 840
+#include "AngularVelocityCalculator.h"
 
-#define PRINT_TIME_PERIOD 2000 // ms
+#define SERIAL_PRINT_TIME_PERIOD 2000
+#define VELOCITY_GET_TIME_PERIOD 5000
+#define VELOCITY_UPDATE_TIME_PERIOD 50
 
-MotorController motor_controller(
-  PWM_PIN,
-  DIRECTION_PIN,
-  ENCODER_PIN_A,
-  ENCODER_PIN_B,
-  VELOCITY_UPDATE_FREQUENCY,
-  ENCODER_COUNTS_PER_ROTATION
-);
+float angular_velocity;
 
-long int last_print_time;
-long int last_vel_update_time;
+AngularVelocityCalculator encoder_shaft(21, 19, 1 / VELOCITY_UPDATE_TIME_PERIOD, 560);
 
-void initialize_timer_2();
+long int last_serial_print_time;
+long int last_velocity_get_time;
+long int last_velocity_update_time;
+
+double velocity_get_num_observations;
+double velocity_get_time_period_sum;
+double velocity_get_time_period_sqr_sum;
+
+double velocity_update_num_observations;
+double velocity_update_time_period_sum;
+double velocity_update_time_period_sqr_sum;
+
+double start_time;
+double duration;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
+  last_serial_print_time = millis();
+  last_velocity_get_time = micros();
+  last_velocity_update_time = micros();
 
-  // initialize_timer_2();
+  velocity_get_num_observations = 0;
+  velocity_get_time_period_sum = 0;
+  velocity_get_time_period_sqr_sum = 0;
+
+  velocity_update_num_observations = 0;
+  velocity_update_time_period_sum = 0;
+  velocity_update_time_period_sqr_sum = 0;
   
-  last_vel_update_time = millis();
-  last_print_time = millis();
-
-  motor_controller.setPIDGains(15, 120, 0);
-
-  motor_controller.setTargetStateValue(10);
-
   Serial.println("Arduino Initialized successfully");
 }
 
 void loop()
 {
-  if (millis() - last_vel_update_time > 1000/VELOCITY_UPDATE_FREQUENCY)
+  
+  if (millis() - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
   {
-    motor_controller.spinMotor();
+    double mean_velocity_update_time = velocity_update_time_period_sum / velocity_update_num_observations;
+    double std_dev_velocity_update_time = sqrt(velocity_update_time_period_sqr_sum / velocity_update_num_observations - mean_velocity_update_time * mean_velocity_update_time);
 
-    last_vel_update_time = millis();
+    double mean_velocity_get_time = velocity_get_time_period_sum / velocity_get_num_observations;
+    double std_dev_velocity_get_time = sqrt(velocity_get_time_period_sqr_sum / velocity_get_num_observations - mean_velocity_get_time * mean_velocity_get_time);
+
+    Serial.print("Time taken for Velocity Update :\tMean\t");
+    Serial.print(mean_velocity_update_time);
+    Serial.print("\tStd Dev\t");
+    Serial.println(std_dev_velocity_update_time);
+
+    Serial.print("Time taken for Velocity Get :\t\tMean\t");
+    Serial.print(mean_velocity_get_time);
+    Serial.print("\tStd Dev\t");
+    Serial.println(std_dev_velocity_get_time);    
+    
+    last_serial_print_time = millis();
   }
 
-  if (millis() - last_print_time > PRINT_TIME_PERIOD)
+  if (micros() - last_velocity_update_time > VELOCITY_UPDATE_TIME_PERIOD)
   {
-    Serial.print("Velocity:\t");
-    Serial.println(motor_controller.getMotorAngularVelocity());
+    start_time = micros();
+    encoder_shaft.updateAngularVelocity();
+    duration = micros() - start_time;
 
-    Serial.print("PID output:\t");
-    Serial.println(motor_controller.getPIDControlOutput());
+    velocity_update_time_period_sum += duration;
+    velocity_update_time_period_sqr_sum += duration * duration;
+    velocity_update_num_observations += 1;
 
-    Serial.print("Error: ");
-    Serial.println(motor_controller.getError());
-
-    last_print_time = millis();
+    last_velocity_update_time = micros();
   }
-}
 
-void initialize_timer_2()
-{
-  // stop interrupts
-  cli();
+  if (micros() - last_velocity_get_time > VELOCITY_GET_TIME_PERIOD)
+  {
+    start_time = micros();
+    encoder_shaft.getAngularVelocity(angular_velocity);
+    duration = micros() - start_time;
 
-  // Clear Timer/Counter Control Resgisters
-  TCCR2A &= 0x00;
-  TCCR2B &= 0x00;
-  // Clear Timer/Counter Register
-  TCNT2 &= 0x00;
-  
-  // Set timer2 to interrupt at 8kHz
+    velocity_get_time_period_sum += duration;
+    velocity_get_time_period_sqr_sum += duration * duration;
+    velocity_get_num_observations += 1;
 
-  // ATmega2560 clock frequency - 16MHz
-  // Prescalers available for timers - 1, 8, 64, 256, 1024
-  // Timer clock frequency = ATmega2560 clock frequency / Prescaler
-  
-  // To have interrupts with better frequency resolution timer
-  // will be operated in Clear Timer on Compare Match (CTC) mode
-  // TCNTx will count from 0x00 to the value in OCRnA register
-  // Frequency of Interrupt = Timer clock frequency / Number of TCNTn Counts before it resets to 0x00
-
-  // TCNTx will be compared to OCRnx in each clock cycle
-  // Upon compare match, interrupt is fired
-  // For 8kHz, TCNTx needs - 
-  //   - 250 counts at 8 prescaler
-  //   - 31.25 counts at 64 prescaler
-  
-  // Turn on CTC mode
-  TCCR2A |= (0x01 << WGM21);
-  // Set Prescaler to 8
-  TCCR2B |= (0x01 << CS22);
-  TCCR2B |= (0x01 << CS20);
-  // Set compare match register (OCR2A) to 249
-  OCR2A = 0xF9;
-  // Enable interrupt upon compare match of OCR2A
-  TIMSK2 |= (0x01 << OCIE2A);
-
-  // allow interrupts
-  sei();
-}
-
-ISR(TIMER2_COMPA_vect)
-{
-  motor_controller.spinMotor();
+    last_velocity_get_time = micros();
+  }
 }

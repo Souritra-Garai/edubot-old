@@ -1,18 +1,25 @@
-/*
-  This is an example code to measure the time taken for the
-  updateAngularVelocity and getAngularVelocity class methods of
-  AngularVelocityCalculator class to execute.
-*/
+/**
+ * @file VelocityCalculationTimeTest.cpp
+ * @author Souritra Garai (souritra.garai@iitgn.ac.in)
+ * @brief This is an example code to measure the time taken for the
+ * updateAngularVelocity and getAngularVelocity class methods of
+ * AngularVelocityCalculator class to execute.
+ * @version 0.1
+ * @date 2021-07-04
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 
 #include "AngularVelocityCalculator.h"
 
 #define SERIAL_PRINT_TIME_PERIOD 2000
 #define VELOCITY_GET_TIME_PERIOD 5000
-#define VELOCITY_UPDATE_TIME_PERIOD 500
+#define VELOCITY_UPDATE_TIME_PERIOD 50
 
 float angular_velocity;
 
-AngularVelocityCalculator encoder_shaft(2, 3, 1 / VELOCITY_UPDATE_TIME_PERIOD, 560);
+AngularVelocityCalculator encoder_shaft(21, 19, 1 / VELOCITY_UPDATE_TIME_PERIOD, 560);
 
 long int last_serial_print_time;
 long int last_velocity_get_time;
@@ -31,7 +38,7 @@ double duration;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   last_serial_print_time = millis();
   last_velocity_get_time = micros();
   last_velocity_update_time = micros();
@@ -53,17 +60,17 @@ void loop()
   if (millis() - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
   {
     double mean_velocity_update_time = velocity_update_time_period_sum / velocity_update_num_observations;
-    double std_dev_velocity_update_time = velocity_update_time_period_sqr_sum / velocity_update_num_observations - mean_velocity_update_time * mean_velocity_update_time;
+    double std_dev_velocity_update_time = sqrt(velocity_update_time_period_sqr_sum / velocity_update_num_observations - mean_velocity_update_time * mean_velocity_update_time);
 
     double mean_velocity_get_time = velocity_get_time_period_sum / velocity_get_num_observations;
-    double std_dev_velocity_get_time = velocity_get_time_period_sqr_sum / velocity_get_num_observations - mean_velocity_get_time * mean_velocity_get_time;
+    double std_dev_velocity_get_time = sqrt(velocity_get_time_period_sqr_sum / velocity_get_num_observations - mean_velocity_get_time * mean_velocity_get_time);
 
     Serial.print("Time taken for Velocity Update :\tMean\t");
     Serial.print(mean_velocity_update_time);
     Serial.print("\tStd Dev\t");
     Serial.println(std_dev_velocity_update_time);
 
-    Serial.print("Time taken for Velocity Get :\tMean\t");
+    Serial.print("Time taken for Velocity Get :\t\tMean\t");
     Serial.print(mean_velocity_get_time);
     Serial.print("\tStd Dev\t");
     Serial.println(std_dev_velocity_get_time);    
