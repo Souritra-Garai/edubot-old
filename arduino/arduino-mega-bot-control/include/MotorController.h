@@ -19,6 +19,9 @@
 // Required for PID class
 #include "PID.h"
 
+// Required for Timer1PhaseCorrectPWM
+#include "PhaseCorrect16BitPWM.h"
+
 /**
  * @brief Class to control a DC motor with rotary encoder attached to its
  * shaft
@@ -29,10 +32,7 @@ class MotorController : public AngularVelocityCalculator, public PID
 {
     private:
 
-        /**
-         * @brief Arduino Mega pin for PWM output
-         */
-        const uint8_t PWM_pin_;
+        Timer1PhaseCorrectPWM PWM_signal;
         
         /**
          * @brief Arduino Mega pin for direction output
@@ -84,8 +84,6 @@ class MotorController : public AngularVelocityCalculator, public PID
         /**
          * @brief Construct a new Motor Controller object
          * 
-         * @param PWM_pin Arduino Mega (PWM enabled) pin number for
-         * PWM output to motor driver
          * @param direction_pin Arduino Mega digital pin number for
          * direction output to motor driver
          * @param encoder_pin_1 Arduino Mega (interrupt enabled) pin number
@@ -98,7 +96,6 @@ class MotorController : public AngularVelocityCalculator, public PID
          * rotary encoder to complete one shaft rotation
          */
         MotorController(
-            uint8_t PWM_pin,
             uint8_t direction_pin,
             uint8_t encoder_pin_1,
             uint8_t encoder_pin_2,
@@ -128,8 +125,9 @@ void MotorController::spinMotor()
     // depending on the sign of PID output
     digitalWrite(direction_pin_, PID_output_ > 0 ? HIGH : LOW);
 
-    // Set the PWM ouput to motor driver to 
-    analogWrite(PWM_pin_, min(abs(PID_output_),0xFF));
+    // Set the duty cycle of PWM ouput to motor driver to the absolute value
+    // of PID output. The value needs to be within 0xFFFF = (65535)_{10}
+    PWM_signal.setDutyCyclePWMChannelA(min(abs(PID_output_), 0xFFFF));
 }
 
 float MotorController::getMotorAngularVelocity()
@@ -143,7 +141,6 @@ float MotorController::getPIDControlOutput()
 }
 
 MotorController::MotorController(
-    uint8_t PWM_pin,
     uint8_t direction_pin,
     uint8_t encoder_pin_1,
     uint8_t encoder_pin_2,
@@ -157,9 +154,12 @@ MotorController::MotorController(
         counts_per_rotation
     ), PID(update_frequency),
     // Initialize const variables
-    PWM_pin_(PWM_pin),
     direction_pin_(direction_pin)
 {   
+    PWM_signal.clearTimerSettings();
+    PWM_signal.setupTimer();
+    PWM_signal.setupChannelA();
+
     // Initialize angular_velocity and PID output to zero
     angular_velocity_ = 0;
     PID_output_ = 0;

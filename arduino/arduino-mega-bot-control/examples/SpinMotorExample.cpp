@@ -13,7 +13,6 @@
 
 #include "MotorController.h"
 
-#define PWM_PIN 11
 #define DIRECTION_PIN 22
 #define ENCODER_PIN_A 18
 #define ENCODER_PIN_B 20
@@ -38,7 +37,6 @@
  * @return MotorController 
  */
 MotorController motor_controller(
-  PWM_PIN,
   DIRECTION_PIN,
   ENCODER_PIN_A,
   ENCODER_PIN_B,
@@ -60,7 +58,7 @@ long int last_print_time;
  */
 long int last_vel_update_time;
 
-void initialize_timer_2();
+void initializeTimer3();
 
 void setup()
 {
@@ -85,17 +83,19 @@ void setup()
    */
   motor_controller.setTargetStateValue(10);
 
+  initializeTimer3();
+
   Serial.println("Arduino Initialized successfully");
 }
 
 void loop()
 {
-  if (millis() - last_vel_update_time > 1000/VELOCITY_UPDATE_FREQUENCY)
-  {
-    motor_controller.spinMotor();
+  // if (millis() - last_vel_update_time > 1000/VELOCITY_UPDATE_FREQUENCY)
+  // {
+  //   motor_controller.spinMotor();
 
-    last_vel_update_time = millis();
-  }
+  //   last_vel_update_time = millis();
+  // }
 
   if (millis() - last_print_time > PRINT_TIME_PERIOD)
   {
@@ -110,4 +110,53 @@ void loop()
 
     last_print_time = millis();
   }
+}
+
+void initializeTimer3()
+{
+  // stop interrupts
+  cli();
+
+  // Clear Timer/Counter Control Resgisters
+  TCCR3A &= 0x00;
+  TCCR3B &= 0x00;
+  TCCR3C &= 0x00;
+  // Clear Timer/Counter Register
+  TCNT3 &= 0x0000;
+  
+  // Set Timer1 to interrupt at 50Hz
+
+  // ATmega2560 clock frequency - 16MHz
+  // Prescalers available for timers - 1, 8, 64, 256, 1024
+  // Timer clock frequency = ATmega2560 clock frequency / Prescaler
+  
+  // To have interrupts with better frequency resolution timer
+  // will be operated in Clear Timer on Compare Match (CTC) mode
+  // TCNTx will count from 0x00 to the value in OCRnA register
+  // Frequency of Interrupt = Timer clock frequency / Number of TCNTn Counts before it resets to 0x00
+
+  // TCNTx will be compared to OCRnx in each clock cycle
+  // Upon compare match, interrupt is fired
+  // For 50Hz, TCNTx needs - 
+  //   - 40000 counts at 8 prescaler
+  //   - 5000 counts at 64 prescaler
+  //   - 1250 counts at 256 prescaler
+  //   - 312.5 counts at 1024 prescaler
+  
+  // Turn on CTC mode
+  TCCR3B |= (0x01 << WGM32);
+  // Set Prescaler to 256
+  TCCR3B |= (0x01 << CS32);
+  // Set compare match register (OCR3A) to 249
+  OCR3A = 0x04E1;
+  // Enable interrupt upon compare match of OCR3A
+  TIMSK3 |= (0x01 << OCIE3A);
+
+  // allow interrupts
+  sei();
+}
+
+ISR(TIMER3_COMPA_vect)
+{
+  motor_controller.spinMotor();
 }
