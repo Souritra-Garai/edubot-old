@@ -1,4 +1,5 @@
 src/main.cpp
+lib/
 
 .pio/
 .vscode/.browse.c_cpp.db*
