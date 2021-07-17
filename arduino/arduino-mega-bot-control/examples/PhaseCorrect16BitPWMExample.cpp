@@ -12,24 +12,23 @@
 
 #include "PhaseCorrect16BitPWM.h"
 
-/**
- * @brief Object for 16 bit PWM
- * 
- */
-Timer1PhaseCorrectPWM pwm_16bit;
-
 void setup() {
    
     Serial.begin(115200);
 
-    pwm_16bit.setupChannelC();
+    Timer1PhaseCorrectPWM::clearTimerSettings();
+    Timer1PhaseCorrectPWM::setupTimer();
+    Timer1PhaseCorrectPWM::setupChannelA();
 }
 
 void loop() {
 
-    for (int i = 0; i < 0x10000; i+=50)
+    for (int i = 0; i <= MAX_PWM_DUTY_CYCLE_INPUT; i+=50)
     {
-        pwm_16bit.setDutyCyclePWMChannelC(i);
+        Timer1PhaseCorrectPWM::setDutyCyclePWMChannelA(i);
         delay(10);
+
+        Serial.print("Current PWM Input: ");
+        Serial.println(i);
     }
 }

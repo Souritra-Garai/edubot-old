@@ -12,6 +12,7 @@
  */
 
 #include "MotorController.h"
+#include "PhaseCorrect16BitPWM.h"
 
 #define DIRECTION_PIN 22
 #define ENCODER_PIN_A 18
@@ -66,7 +67,7 @@ void setup()
    * @brief Initialise Serial Comm
    * 
    */
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   last_vel_update_time = millis();
   last_print_time = millis();
@@ -75,13 +76,13 @@ void setup()
    * @brief Set PID gains to P=15, I=120 and D=0 
    * 
    */
-  motor_controller.setPIDGains(15, 120, 0);
+  motor_controller.setPIDGains(1000, 0, 0);
 
   /**
    * @brief Set target angular velocity
    * 
    */
-  motor_controller.setTargetStateValue(10);
+  motor_controller.setTargetStateValue(2);
 
   initializeTimer3();
 
@@ -147,7 +148,7 @@ void initializeTimer3()
   TCCR3B |= (0x01 << WGM32);
   // Set Prescaler to 256
   TCCR3B |= (0x01 << CS32);
-  // Set compare match register (OCR3A) to 249
+  // Set compare match register (OCR3A) to 1250-1
   OCR3A = 0x04E1;
   // Enable interrupt upon compare match of OCR3A
   TIMSK3 |= (0x01 << OCIE3A);

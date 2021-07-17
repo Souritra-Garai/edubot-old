@@ -22,6 +22,8 @@
 // Required for Timer1PhaseCorrectPWM
 #include "PhaseCorrect16BitPWM.h"
 
+#define MAX_PWM_VAL 0xFFFF
+
 /**
  * @brief Class to control a DC motor with rotary encoder attached to its
  * shaft
@@ -102,7 +104,6 @@ class MotorController : public AngularVelocityCalculator, public PID
             float update_frequency,
             float counts_per_rotation
         );
-
 };
 
 /*=====================================================================================================*/
@@ -127,7 +128,7 @@ void MotorController::spinMotor()
 
     // Set the duty cycle of PWM ouput to motor driver to the absolute value
     // of PID output. The value needs to be within 0xFFFF = (65535)_{10}
-    PWM_signal.setDutyCyclePWMChannelA(min(abs(PID_output_), 0xFFFF));
+    PWM_signal.setDutyCyclePWMChannelA(min(abs(PID_output_), MAX_PWM_VAL));
 }
 
 float MotorController::getMotorAngularVelocity()

@@ -1,7 +1,7 @@
 /**
  * @file PhaseCorrect16BitPWM.cpp
  * @author Souritra Garai (souritra.garai@iitgn.ac.in)
- * @brief Implementation details for Timer1PhaseCorrectPWM class
+ * @brief Implementation details for Timer1PhaseCorrectPWM 
  * @version 0.1
  * @date 2021-07-07
  * 
@@ -13,12 +13,6 @@
 
 // Required for Atomic Block function to block interrupts
 #include <util/atomic.h>
-
-Timer1PhaseCorrectPWM::Timer1PhaseCorrectPWM()
-{
-    // Set up Timer 1 for Phase and Frequency Correct PWM Generation
-    setupTimer();
-}
 
 void Timer1PhaseCorrectPWM::clearTimerSettings()
 {
