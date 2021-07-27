@@ -58,12 +58,12 @@ class MotorController : public AngularVelocityCalculator, public PID
         /**
          * @brief Stops the motor and disables PID controller
          */
-        inline void stop_motor() __attribute__((always_inline));
+        void stopMotor();
 
         /**
          * @brief Enable PID control for the motor
          */
-        inline void enablePIDControl();
+        void enablePIDControl();
 
         /**
          * @brief Updates the current angular velocity, uses PID
@@ -83,7 +83,7 @@ class MotorController : public AngularVelocityCalculator, public PID
          * 
          * @return float Angular velocity of the motor
          */
-        inline float getMotorAngularVelocity() { return angular_velocity_; }
+        float getMotorAngularVelocity();
 
         /**
          * @brief Get the latest evaluated PID output
@@ -139,51 +139,11 @@ void MotorController::spinMotor()
     }
 }
 
-void MotorController::stop_motor()
-{
-    // Disable PID control
-    PID_control_enable_ = false;
-    // Set duty cyle for PWM output to 0
-    PID_output_ = 0;
-}
-
-void MotorController::enablePIDControl()
-{
-    // Reset PID
-    reset();
-    // Enable PID
-    PID_control_enable_ = true;
-}
-
 float MotorController::getPIDControlOutput()
 {
     // Set the duty cycle of PWM ouput to motor driver to the absolute value
     // of PID output. The value needs to be within 0xFFFF = (65535)_{10}
     return min(abs(PID_output_), MAX_PWM_DUTY_CYCLE_INPUT);
-}
-
-MotorController::MotorController(
-    uint8_t direction_pin,
-    uint8_t encoder_pin_1,
-    uint8_t encoder_pin_2,
-    float update_frequency,
-    float counts_per_rotation
-) : // Call base class constructors
-    AngularVelocityCalculator(
-        encoder_pin_1,
-        encoder_pin_2,
-        update_frequency,
-        counts_per_rotation
-    ), PID(1),
-    // Initialize const variables
-    direction_pin_(direction_pin)
-{
-    // Initialize angular_velocity and PID output to zero
-    angular_velocity_ = 0;
-    PID_output_ = 0;
-
-    // Initialise the motors in stopping position
-    stop_motor();
 }
 
 #endif
