@@ -19,26 +19,34 @@ ROSMotorController::ROSMotorController(
     uint8_t encoder_pin_2,
     float update_frequency,
     float counts_per_rotation
-) : MotorController(
+) : // Mem Initialization list
+    // Base Class Constructor
+    MotorController(
         direction_pin,
         encoder_pin_1,
         encoder_pin_2,
         update_frequency,
         counts_per_rotation
     ),
+    // Subscriber Constructor
     target_angular_velocity_subscriber_(
         getTargetAngularVelocityTopic_(topic_prefix),
-        &ROSMotorController::target_angular_velocity_callback,
+        &ROSMotorController::targetAngularVelocityCallback_,
         this
     ),
+    // Publisher Constructor
     current_angular_velocity_publisher_(
         getCurrentAngularVelocityTopic_(topic_prefix),
         &current_angular_velocity_message_
     )
-{ ;}
-
-void ROSMotorController::target_angular_velocity_callback(const std_msgs::Float32 &target_velocity_message)
 {
+    // Nothing to do 
+    ;
+}
+
+void ROSMotorController::targetAngularVelocityCallback_(const std_msgs::Float32 &target_velocity_message)
+{
+    // Set PID target to the desired target velocity
     setTargetStateValue(target_velocity_message.data);
 }
 

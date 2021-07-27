@@ -21,6 +21,10 @@ MotorController::MotorController(
     angular_velocity_ = 0;
     PID_output_ = 0;
 
+    // Initialise the data direction for direction pin to
+    // output
+    // pinMode(direction_pin_, OUTPUT);
+
     // Initialise the motors in stopping position
     stopMotor();
 }

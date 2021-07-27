@@ -13,6 +13,9 @@
 #ifndef __MOTOR_CONTROLLER__
 #define __MOTOR_CONTROLLER__
 
+// Required for digital Write function
+#include <Arduino.h>
+
 // Required for AngularVelocityCalculator class
 #include "AngularVelocityCalculator.h"
 

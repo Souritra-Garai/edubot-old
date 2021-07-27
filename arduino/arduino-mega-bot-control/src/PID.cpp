@@ -27,6 +27,7 @@ PID::PID(
 // Reset error and integral error to zero
 void PID::reset()
 {
+    target_state_value_ = 0;
     last_error_ = 0;
     integral_error_ = 0;
 }

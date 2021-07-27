@@ -21,10 +21,11 @@ class ROSMotorController : public MotorController
 {
     private :
 
-        char target_angular_velocity_subscriber_topic_[20];
-        char current_angular_velocity_publisher_topic_[20];
+        char target_angular_velocity_subscriber_topic_[50];
+        char current_angular_velocity_publisher_topic_[50];
         
         ros::Subscriber<std_msgs::Float32, ROSMotorController> target_angular_velocity_subscriber_;
+        void targetAngularVelocityCallback_(const std_msgs::Float32 &target_velocity_message);
         
         std_msgs::Float32 current_angular_velocity_message_;
         ros::Publisher current_angular_velocity_publisher_;
@@ -42,8 +43,6 @@ class ROSMotorController : public MotorController
             float update_frequency,
             float counts_per_rotation
         );
-
-        void target_angular_velocity_callback(const std_msgs::Float32 &target_velocity_message);
 
         void initialize_publishers_and_subscribers(ros::NodeHandle &node_handle);
 
