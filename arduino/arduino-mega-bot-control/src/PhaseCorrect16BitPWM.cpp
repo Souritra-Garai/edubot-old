@@ -34,10 +34,10 @@ void Timer1PhaseCorrectPWM::setupTimer()
     // Blocks all interrupts and restores after clearing the registers
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        // Set Prescaler to 1024 for PWM Frequency = 15.625 kHz
-        // PWM Frequency in the range 5 - 20 kHz
-        // Link - https://electronics.stackexchange.com/q/242298
-        TCCR1B |= (0x01 << CS10) | (0x01 << CS12);
+        // Hotfix - Keep prescaler = 1
+        // Don't know why but higher prescalers doesn't work
+        // No prescaler
+        TCCR1B |= (0x01 << CS10);
 
         // Setting Wave Generator mode to Phase and Frequency
         // correct PWM with ICR1 register as the TOP value
@@ -54,13 +54,16 @@ void Timer1PhaseCorrectPWM::setupChannelA()
     // Blocks all interrupts and restores after clearing the registers
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
+        // Initially set duty cycle to 0
+        OCR1A = 0x0000;
+        
         // OC1A is attached to Pin 5 of Port B on the ATmega chip
         // Configure Data direction of Port B Pin 5 to Output
         DDRB |= 0x01 << PB5;
 
         // Clear OC1A on compare match while up-counting and
         // Set OC1A on compare match while down-counting
-        TCCR1A |= 0x01 << COM1A1;
+        TCCR1A |= (0x01 << COM1A1);
     }
 }
 
@@ -77,6 +80,8 @@ void Timer1PhaseCorrectPWM::setupChannelB()
         // Set OC1B on compare match while down-counting
         TCCR1A |= 0x01 << COM1B1;
     }
+    // Initially set duty cycle to 0
+    setDutyCyclePWMChannelB(0);
 }
 
 void Timer1PhaseCorrectPWM::setupChannelC()
@@ -92,4 +97,6 @@ void Timer1PhaseCorrectPWM::setupChannelC()
         // Set OC1C on compare match while down-counting
         TCCR1A |= 0x01 << COM1C1;
     }
+    // Initially set duty cycle to 0
+    setDutyCyclePWMChannelC(0);
 }

@@ -19,10 +19,8 @@
 // Required for PID class
 #include "PID.h"
 
-// Required for Timer1PhaseCorrectPWM
+// Required for MAX_PWM_DUTY_CYCLE_INPUT
 #include "PhaseCorrect16BitPWM.h"
-
-#define MAX_PWM_VAL 0xFFFF
 
 /**
  * @brief Class to control a DC motor with rotary encoder attached to its
@@ -33,8 +31,6 @@
 class MotorController : public AngularVelocityCalculator, public PID
 {
     private:
-
-        Timer1PhaseCorrectPWM PWM_signal;
         
         /**
          * @brief Arduino Mega pin for direction output
@@ -51,7 +47,23 @@ class MotorController : public AngularVelocityCalculator, public PID
          */
         float PID_output_;
 
+        /**
+         * @brief Variable to store truth value, whether to enable
+         * PID control for the motor
+         */
+        bool PID_control_enable_;
+
     public :
+
+        /**
+         * @brief Stops the motor and disables PID controller
+         */
+        inline void stop_motor() __attribute__((always_inline));
+
+        /**
+         * @brief Enable PID control for the motor
+         */
+        inline void enablePIDControl();
 
         /**
          * @brief Updates the current angular velocity, uses PID
@@ -71,7 +83,7 @@ class MotorController : public AngularVelocityCalculator, public PID
          * 
          * @return float Angular velocity of the motor
          */
-        inline float getMotorAngularVelocity();
+        inline float getMotorAngularVelocity() { return angular_velocity_; }
 
         /**
          * @brief Get the latest evaluated PID output
@@ -81,7 +93,7 @@ class MotorController : public AngularVelocityCalculator, public PID
          * 
          * @return float PID output
          */
-        inline float getPIDControlOutput();
+        inline float getPIDControlOutput() __attribute__((always_inline));
 
         /**
          * @brief Construct a new Motor Controller object
@@ -94,8 +106,6 @@ class MotorController : public AngularVelocityCalculator, public PID
          * to which rotary encoder pin B is connected
          * @param update_frequency Frequency at which control loop is 
          * updated
-         * @param counts_per_rotation Number of quadrature turn counts of 
-         * rotary encoder to complete one shaft rotation
          */
         MotorController(
             uint8_t direction_pin,
@@ -114,31 +124,42 @@ class MotorController : public AngularVelocityCalculator, public PID
 // control values for the same. Write the PWM value and direction
 void MotorController::spinMotor()
 {
-    // Update the angular velocity state as per the new captured position of the encoder
-    updateAngularVelocity();
     // Calculate the angular velocity and store it in the variable angular_velocity_
     getAngularVelocity(angular_velocity_);
-    
-    // Calculate the PID output and round it off to closest integer (for PWM output)
-    PID_output_ = round(getControllerOutput(angular_velocity_));
 
-    // Write a HIGH or LOW value to the direction pin on the motor driver 
-    // depending on the sign of PID output
-    digitalWrite(direction_pin_, PID_output_ > 0 ? HIGH : LOW);
-
-    // Set the duty cycle of PWM ouput to motor driver to the absolute value
-    // of PID output. The value needs to be within 0xFFFF = (65535)_{10}
-    PWM_signal.setDutyCyclePWMChannelA(min(abs(PID_output_), MAX_PWM_VAL));
+    // If PID control is enabled
+    if (PID_control_enable_)
+    {
+        // Calculate the PID output and round it off to closest integer (for PWM output)
+        PID_output_ = round(getControllerOutput(angular_velocity_));
+        
+        // Write a HIGH or LOW value to the direction pin on the motor driver 
+        // depending on the sign of PID output
+        digitalWrite(direction_pin_, PID_output_ > 0 ? HIGH : LOW);
+    }
 }
 
-float MotorController::getMotorAngularVelocity()
+void MotorController::stop_motor()
 {
-    return angular_velocity_;
+    // Disable PID control
+    PID_control_enable_ = false;
+    // Set duty cyle for PWM output to 0
+    PID_output_ = 0;
+}
+
+void MotorController::enablePIDControl()
+{
+    // Reset PID
+    reset();
+    // Enable PID
+    PID_control_enable_ = true;
 }
 
 float MotorController::getPIDControlOutput()
 {
-    return PID_output_;
+    // Set the duty cycle of PWM ouput to motor driver to the absolute value
+    // of PID output. The value needs to be within 0xFFFF = (65535)_{10}
+    return min(abs(PID_output_), MAX_PWM_DUTY_CYCLE_INPUT);
 }
 
 MotorController::MotorController(
@@ -153,17 +174,16 @@ MotorController::MotorController(
         encoder_pin_2,
         update_frequency,
         counts_per_rotation
-    ), PID(update_frequency),
+    ), PID(1),
     // Initialize const variables
     direction_pin_(direction_pin)
-{   
-    PWM_signal.clearTimerSettings();
-    PWM_signal.setupTimer();
-    PWM_signal.setupChannelA();
-
+{
     // Initialize angular_velocity and PID output to zero
     angular_velocity_ = 0;
     PID_output_ = 0;
+
+    // Initialise the motors in stopping position
+    stop_motor();
 }
 
 #endif

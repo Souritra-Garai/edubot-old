@@ -18,25 +18,13 @@
 #define ENCODER_PIN_A 18
 #define ENCODER_PIN_B 20
 
-/**
- * @brief Frequency at which velocity is updated
- * 
- */
 #define VELOCITY_UPDATE_FREQUENCY 50 // Hz
 
 #define ENCODER_COUNTS_PER_ROTATION 840
 
-/**
- * @brief Time interval at which anything is printed to serial monitor.
- * 
- */
+// Time interval at which anything is printed to serial monitor.
 #define PRINT_TIME_PERIOD 2000 // ms
 
-/**
- * @brief Our object for motor controller
- * 
- * @return MotorController 
- */
 MotorController motor_controller(
   DIRECTION_PIN,
   ENCODER_PIN_A,
@@ -45,48 +33,36 @@ MotorController motor_controller(
   ENCODER_COUNTS_PER_ROTATION
 );
 
-/**
- * @brief Variable to store the last time anything was
- * printed through the serial port in millisecond.
- * 
- */
+// Variable to store the last time anything was
+// printed through the serial port in millisecond.
 long int last_print_time;
 
-/**
- * @brief Variable to store the last time the angular 
- * velocity was updated in millisecond.
- * 
- */
+// Variable to store the last time the angular 
+// velocity was updated in millisecond.
 long int last_vel_update_time;
 
 void initializeTimer3();
 
 void setup()
 {
-  /**
-   * @brief Initialise Serial Comm
-   * 
-   */
   Serial.begin(115200);
+
+  Timer1PhaseCorrectPWM::clearTimerSettings();
+  Timer1PhaseCorrectPWM::setupTimer();
+  Timer1PhaseCorrectPWM::setupChannelA();
 
   last_vel_update_time = millis();
   last_print_time = millis();
 
-  /**
-   * @brief Set PID gains to P=15, I=120 and D=0 
-   * 
-   */
-  motor_controller.setPIDGains(1000, 0, 0);
+  motor_controller.setPIDGains(5, 120, 0);
 
-  /**
-   * @brief Set target angular velocity
-   * 
-   */
-  motor_controller.setTargetStateValue(2);
+  motor_controller.setTargetStateValue(10);
 
   initializeTimer3();
 
   Serial.println("Arduino Initialized successfully");
+
+  motor_controller.enablePIDControl();
 }
 
 void loop()
@@ -159,5 +135,7 @@ void initializeTimer3()
 
 ISR(TIMER3_COMPA_vect)
 {
+  motor_controller.updateAngularVelocity();
   motor_controller.spinMotor();
+  Timer1PhaseCorrectPWM::setDutyCyclePWMChannelA(motor_controller.getPIDControlOutput());
 }
