@@ -15,6 +15,7 @@
 
 #include <ros.h>
 #include <std_srvs/Trigger.h>
+#include <control_toolbox/SetPidGains.h>
 
 #include "ROSMotorController.h"
 #include "PhaseCorrect16BitPWM.h"
@@ -29,8 +30,8 @@
 
 #define VELOCITY_UPDATE_FREQUENCY 50 // Hz
 
-#define PID_Kp  5
-#define PID_Ki  120
+#define PID_Kp  5000
+#define PID_Ki  2500
 #define PID_Kd  0
 
 #define ENCODER_COUNTS_PER_ROTATION 840
@@ -61,10 +62,18 @@ ros::NodeHandle node_handle;
 void stopBotServiceCallback(const std_srvs::TriggerRequest&, std_srvs::TriggerResponse&);
 void moveBotServiceCallback(const std_srvs::TriggerRequest&, std_srvs::TriggerResponse&);
 
+void setPidGainsServiceCallback(
+  const control_toolbox::SetPidGainsRequest&,
+  control_toolbox::SetPidGainsResponse&
+);
+
 ros::ServiceServer<std_srvs::TriggerRequest, std_srvs::TriggerResponse>
-  stopBotServiceServer("edubot/stop_bot", &stopBotServiceCallback);
+  stopBotServiceServer("stop_bot", &stopBotServiceCallback);
 ros::ServiceServer<std_srvs::TriggerRequest, std_srvs::TriggerResponse>
-  moveBotServiceServer("edubot/move_bot", &moveBotServiceCallback);
+  moveBotServiceServer("move_bot", &moveBotServiceCallback);
+
+ros::ServiceServer<control_toolbox::SetPidGainsRequest, control_toolbox::SetPidGainsResponse>
+  setPidGainsServiceServer("set_PID_gains", &setPidGainsServiceCallback);
 
 // Variable to store the last time anything was
 // printed through the serial port in millisecond.
@@ -91,6 +100,7 @@ void setup()
 
   node_handle.advertiseService(stopBotServiceServer);
   node_handle.advertiseService(moveBotServiceServer);
+  node_handle.advertiseService(setPidGainsServiceServer);
 
   initializeTimer3();
 
@@ -183,4 +193,28 @@ void moveBotServiceCallback(const std_srvs::TriggerRequest& request, std_srvs::T
 
   response.success = true;
   response.message = "Bot velocity PID control enabled";
+}
+
+void setPidGainsServiceCallback(
+  const control_toolbox::SetPidGainsRequest& request,
+  control_toolbox::SetPidGainsResponse& response
+) {
+
+  motor_controller_l.stopMotor();
+  motor_controller_r.stopMotor();
+
+  motor_controller_l.setPIDGains(
+    request.p,
+    request.i,
+    request.d
+  );
+
+  motor_controller_r.setPIDGains(
+    request.p,
+    request.i,
+    request.d
+  );
+
+  motor_controller_l.enablePIDControl();
+  motor_controller_r.enablePIDControl();
 }

@@ -18,7 +18,8 @@ ROSMotorController::ROSMotorController(
     uint8_t encoder_pin_1,
     uint8_t encoder_pin_2,
     float update_frequency,
-    float counts_per_rotation
+    float counts_per_rotation,
+    bool reverse
 ) : // Mem Initialization list
     // Base Class Constructor
     MotorController(
@@ -26,7 +27,8 @@ ROSMotorController::ROSMotorController(
         encoder_pin_1,
         encoder_pin_2,
         update_frequency,
-        counts_per_rotation
+        counts_per_rotation,
+        reverse
     ),
     // Subscriber Constructor
     target_angular_velocity_subscriber_(

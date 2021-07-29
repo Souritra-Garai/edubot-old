@@ -41,6 +41,11 @@ class MotorController : public AngularVelocityCalculator, public PID
         const uint8_t direction_pin_;
 
         /**
+         * @brief Truth value whether to reverse direction pin logic
+         */
+        const bool reverse_;
+
+        /**
          * @brief Variable for storing angular velocity
          */
         float angular_velocity_;
@@ -109,13 +114,15 @@ class MotorController : public AngularVelocityCalculator, public PID
          * to which rotary encoder pin B is connected
          * @param update_frequency Frequency at which control loop is 
          * updated
+         * @param reverse Truth value whether to reverse direction pin logic
          */
         MotorController(
             uint8_t direction_pin,
             uint8_t encoder_pin_1,
             uint8_t encoder_pin_2,
             float update_frequency,
-            float counts_per_rotation
+            float counts_per_rotation,
+            bool reverse = false
         );
 };
 
@@ -138,7 +145,7 @@ void MotorController::spinMotor()
         
         // Write a HIGH or LOW value to the direction pin on the motor driver 
         // depending on the sign of PID output
-        digitalWrite(direction_pin_, PID_output_ > 0 ? HIGH : LOW);
+        digitalWrite(direction_pin_, PID_output_ > 0 ? reverse_^true : reverse_^false);
     }
 }
 

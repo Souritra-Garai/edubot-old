@@ -41,7 +41,8 @@ class ROSMotorController : public MotorController
             uint8_t encoder_pin_1,
             uint8_t encoder_pin_2,
             float update_frequency,
-            float counts_per_rotation
+            float counts_per_rotation,
+            bool reverse = false
         );
 
         void initialize_publishers_and_subscribers(ros::NodeHandle &node_handle);

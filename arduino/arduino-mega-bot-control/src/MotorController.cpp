@@ -6,7 +6,8 @@ MotorController::MotorController(
     uint8_t encoder_pin_1,
     uint8_t encoder_pin_2,
     float update_frequency,
-    float counts_per_rotation
+    float counts_per_rotation,
+    bool reverse
 ) : // Call base class constructors
     AngularVelocityCalculator(
         encoder_pin_1,
@@ -15,7 +16,8 @@ MotorController::MotorController(
         counts_per_rotation
     ), PID(update_frequency),
     // Initialize const variables
-    direction_pin_(direction_pin)
+    direction_pin_(direction_pin),
+    reverse_(reverse)
 {
     // Initialize angular_velocity and PID output to zero
     angular_velocity_ = 0;
