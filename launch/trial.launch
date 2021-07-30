@@ -1,9 +1,0 @@
-<launch>
-
-    <node pkg = "edubot" type="VelocityControlNode" name="VelocityControlNode" output="screen"/>
-    
-    <node pkg = "rosserial_arduino" type="serial_node.py" name="arduino_node" output="screen"/>
-        
-        <param name="~port" value="/dev/ttyUSB0"/>
-
-</launch>

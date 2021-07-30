@@ -102,7 +102,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS
   LIBRARIES
   CATKIN_DEPENDS roscpp rospy std_msgs
   DEPENDS
@@ -152,10 +152,10 @@ include_directories(
 # Declare a C++ executable
 # With catkin_make all packages are built within a single CMake context
 # The recommended prefix ensures that target names across packages don't collide
-add_executable(VelocityControlNode src/VelocityControlNode.cpp)
+add_executable(diff_drive_node src/DifferentialDriveNode.cpp)
 
 # Specify libraries to link a library or executable target against
-target_link_libraries(VelocityControlNode
+target_link_libraries(diff_drive_node
   ${catkin_LIBRARIES}
 )
 
@@ -174,7 +174,7 @@ target_link_libraries(VelocityControlNode
 
 # Mark executables for installation
 # See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-install(TARGETS VelocityControlNode
+install(TARGETS diff_drive_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -193,12 +193,11 @@ install(DIRECTORY include/${PROJECT_NAME}/ include/
   PATTERN ".svn" EXCLUDE
 )
 
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+# Mark other files for installation (e.g. launch and bag files, etc.)
+install(FILES
+  launch/edubot.launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 #############
 ## Testing ##
