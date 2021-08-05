@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -52,12 +53,11 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message2.msg
 # )
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+# Generate services in the 'srv' folder
+add_service_files(
+  FILES
+  SetFloatParam.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -66,11 +66,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -102,9 +101,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS
-  LIBRARIES
-  CATKIN_DEPENDS roscpp rospy std_msgs
+  INCLUDE_DIRS include include/edubot include/ros_wrappers
+  LIBRARIES differentialdrive
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
   DEPENDS
 )
 
@@ -116,6 +115,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
+  include/edubot
+  include/ros_wrappers
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -157,7 +158,34 @@ add_executable(diff_drive_node src/DifferentialDriveNode.cpp)
 # Specify libraries to link a library or executable target against
 target_link_libraries(diff_drive_node
   ${catkin_LIBRARIES}
+  differentialdrive
+  rosdifferentialdrive
 )
+
+# Add cmake target dependencies of the executable
+# same as for the library above
+add_dependencies(diff_drive_node differentialdrive rosdifferentialdrive ${catkin_EXPORTED_TARGETS})
+
+# Declare a C++ library
+add_library(differentialdrive
+  src/edubot/DifferentialDrive.cpp
+)
+
+# Declare a C++ library
+add_library(rosdifferentialdrive
+  src/ros_wrappers/ROSDifferentialDrive.cpp
+)
+
+# Specify libraries to link a library or executable target against
+target_link_libraries(rosdifferentialdrive
+  ${catkin_LIBRARIES}
+  differentialdrive
+)
+
+# Add cmake target dependencies of the library
+# as an example, code may need to be generated before libraries
+# either from message generation or dynamic reconfigure
+add_dependencies(rosdifferentialdrive ${edubot_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
@@ -178,16 +206,16 @@ install(TARGETS diff_drive_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# # Mark libraries for installation
-# # See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-# install(TARGETS
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-# )
+# Mark libraries for installation
+# See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
+install(TARGETS differentialdrive rosdifferentialdrive
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+)
 
 # Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/ include/
+install(DIRECTORY include/ include/edubot/ include/ros_wrappers/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
