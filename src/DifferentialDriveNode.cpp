@@ -6,9 +6,9 @@
 #define WHEEL_BASE  0.212f // m
 #define WHEEL_DIA   0.065f // m
 
-#define WHEEL_MAX_VEL 12.0f // rad/s
+#define WHEEL_MAX_SPEED 15.0f // rad/s
 
-DifferentialDrive differential_drive(WHEEL_BASE, WHEEL_DIA / 2, WHEEL_MAX_VEL);
+DifferentialDrive differential_drive(WHEEL_BASE, WHEEL_DIA / 2, WHEEL_MAX_SPEED);
 
 int main(int argc, char **argv)
 {

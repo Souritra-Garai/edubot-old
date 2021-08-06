@@ -47,7 +47,7 @@ bool ROSDifferentialDrive::setMaxWheelSpeedSrvCb_(
 
 void ROSDifferentialDrive::cmdvelCb_(const geometry_msgs::Twist &msg)
 {
-    std::pair<float, float> wheel_vel = differential_drive_.getWheelVelocity(msg.linear.x, msg.angular.y);
+    std::pair<float, float> wheel_vel = differential_drive_.getWheelVelocity(msg.linear.x, msg.angular.z);
 
     left_wheel_ang_vel_msg_.data  = wheel_vel.first;
     right_wheel_ang_vel_msg_.data = wheel_vel.second;
