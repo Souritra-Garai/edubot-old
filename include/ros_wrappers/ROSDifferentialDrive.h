@@ -2,28 +2,30 @@
 #define __ROS_DIFFERENTIAL_DRIVE__
 
 #include <ros/ros.h>
-#include <std_msgs/Float32.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
 
 #include <edubot/SetFloatParam.h>
+#include <edubot/WheelAngularVelocityPair.h>
 
 #include "edubot/DifferentialDrive.h"
 
-class ROSDifferentialDrive
+class ROSDifferentialDrive : public DifferentialDrive 
 {
     private:
 
-        DifferentialDrive &differential_drive_;
+        ros::Publisher vel_pub_;
+        geometry_msgs::TwistStamped vel_msg_;
+        
+        ros::Publisher wheel_targ_ang_vel_pub_;
+        edubot::WheelAngularVelocityPair wheel_targ_ang_vel_msg_;
+        
+        ros::Subscriber wheel_curr_ang_vel_sub_;
+        void wheelCurrAngVelCb_(const edubot::WheelAngularVelocityPair &wheel_curr_ang_vel_msg);
 
         ros::Subscriber cmdvel_sub_;
         void cmdvelCb_(const geometry_msgs::Twist &cmd_vel_msg);
-
-        ros::Publisher left_wheel_ang_vel_pub_;
-        std_msgs::Float32 left_wheel_ang_vel_msg_;
         
-        ros::Publisher right_wheel_ang_vel_pub_;
-        std_msgs::Float32 right_wheel_ang_vel_msg_;
-
         ros::ServiceServer set_max_wheel_speed_srv_server_;
         bool setMaxWheelSpeedSrvCb_(
             edubot::SetFloatParam::Request  &srv_rqst,
@@ -37,9 +39,11 @@ class ROSDifferentialDrive
     public:
     
         ROSDifferentialDrive(
-            DifferentialDrive &differential_drive,
             ros::NodeHandle &node_handle,
-            std::string prefix
+            std::string prefix,
+            float wheel_base,
+            float wheel_radius,
+            float max_wheel_speed = 1.0
         );
 };
 

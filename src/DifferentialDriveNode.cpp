@@ -8,15 +8,13 @@
 
 #define WHEEL_MAX_SPEED 15.0f // rad/s
 
-DifferentialDrive differential_drive(WHEEL_BASE, WHEEL_DIA / 2, WHEEL_MAX_SPEED);
-
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "diff_drive_node");
 
     ros::NodeHandle node_handle;
 
-    ROSDifferentialDrive ros_differential_drive(differential_drive, node_handle, "");
+    ROSDifferentialDrive ros_differential_drive(node_handle, "", WHEEL_BASE, WHEEL_DIA / 2, WHEEL_MAX_SPEED);
     
     ros::spin();
 
