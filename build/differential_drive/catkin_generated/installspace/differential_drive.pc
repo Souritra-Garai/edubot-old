@@ -1,8 +1,0 @@
-prefix=/home/souritra/edubot/install
-
-Name: differential_drive
-Description: Description of differential_drive
-Version: 1.0.0
-Cflags: -I${prefix}/include
-Libs: -L${prefix}/lib -ldifferentialDrive
-Requires: geometry_msgs roscpp message_runtime
