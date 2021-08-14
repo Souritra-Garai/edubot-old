@@ -1,0 +1,2 @@
+differential_drive
+-DCATKIN_DEVEL_PREFIX=/home/souritra/edubot/devel -DCMAKE_INSTALL_PREFIX=/home/souritra/edubot/install -G Unix Makefiles

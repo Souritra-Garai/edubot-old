@@ -1,0 +1,6 @@
+(cl:in-package differential_drive-msg)
+(cl:export '(WHEEL_ANGULAR_VELOCITY_LEFT-VAL
+          WHEEL_ANGULAR_VELOCITY_LEFT
+          WHEEL_ANGULAR_VELOCITY_RIGHT-VAL
+          WHEEL_ANGULAR_VELOCITY_RIGHT
+))

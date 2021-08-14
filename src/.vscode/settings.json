@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "any": "cpp",
+        "optional": "cpp",
+        "variant": "cpp"
+    }
+}
