@@ -86,3 +86,13 @@ void DeadReckoning::implicitUpdate(
 
     p_dot_ = p_dot;
 }
+
+Eigen::Vector3f DeadReckoning::getPosture()
+{
+    return Eigen::Vector3f(p_);
+}
+
+Eigen::Vector3f DeadReckoning::getPostureTimeDerivative()
+{
+    return Eigen::Vector3f(p_dot_);
+}
