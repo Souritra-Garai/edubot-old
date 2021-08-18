@@ -54,6 +54,7 @@ bool ROSDifferentialDrive::setMaxWheelSpeedSrvCb_(
     differential_drive::SetFloatParam::Response &srv_resp
 ) {
     setMaxWheelSpeed(srv_rqst.val);
+    srv_resp.success = true;
     return true;
 }
 
@@ -71,7 +72,7 @@ void ROSDifferentialDrive::wheelCurrAngVelCb_(const differential_drive::WheelAng
 {
     std::pair<float, float> bot_vel = getBotVelocity(msg.wheel_angular_velocity_left, msg.wheel_angular_velocity_right);
 
-    vel_msg_.header.frame_id = "bot_base";
+    vel_msg_.header.frame_id = "odom";
     // vel_msg_.header.seq is updated automatically
     vel_msg_.header.stamp = ros::Time::now();
 
